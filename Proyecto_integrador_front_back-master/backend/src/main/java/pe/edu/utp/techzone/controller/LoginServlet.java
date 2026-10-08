@@ -13,15 +13,20 @@ public class LoginServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String usuario = request.getParameter("username");
-        // Aquí validarías con tu base de datos o lógica de negocio
-        String rol = "vendedor"; 
+        String password = request.getParameter("password");
         
-        // Guardar datos en la sesión como pide la rúbrica
-        HttpSession session = request.getSession();
-        session.setAttribute("usuario", usuario);
-        session.setAttribute("rol", rol);
         
-        // Redirigir a la vista correspondiente
-        response.sendRedirect("dashboard.jsp");
+        if (usuario != null && !usuario.isEmpty()) {
+            HttpSession session = request.getSession();
+            session.setAttribute("usuario", usuario);
+            
+            session.setAttribute("rol", "vendedor"); 
+            
+            
+            response.sendRedirect(request.getContextPath() + "/dashboard");
+        } else {
+            
+            response.sendRedirect(request.getContextPath() + "/login.jsp");
+        }
     }
 }

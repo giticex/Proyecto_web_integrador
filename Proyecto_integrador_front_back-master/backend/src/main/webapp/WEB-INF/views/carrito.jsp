@@ -1,13 +1,13 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
 <head>
-    <title>Carrito de Compras - TechZone</title>
+    <title>Catálogo - TechZone</title>
 </head>
-<body style="font-family: Arial; padding: 20px;">
-    <h2>Tu Carrito de Compras</h2>
-    <p>Revisa los artículos seleccionados antes de procesar tu venta.</p>
+<body style="font-family: Arial; text-align: center; padding: 50px;">
+    <h1 style="color: red; font-size: 50px;">404</h1>
+    <h2>Página no encontrada o acceso denegado</h2>
+    <p>No tienes los permisos necesarios para ver esta sección o la ruta no existe.</p>
     <br>
-    <a href="${pageContext.request.contextPath}/dashboard">Volver al Dashboard</a>
+    <a href="${pageContext.request.contextPath}/login">Ir al Login</a>
 </body>
 </html>
