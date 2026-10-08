@@ -11,6 +11,8 @@ import pe.edu.utp.techzone.exception.BusinessException;
 import pe.edu.utp.techzone.repository.ClienteRepository;
 import pe.edu.utp.techzone.repository.UsuarioRepository;
 
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -18,20 +20,33 @@ public class AuthService {
     private final ClienteRepository clienteRepository;
     private final PasswordService passwordService;
 
-    @Transactional(readOnly = true)
+    public Optional<Usuario> buscarUsuarioConRol(String username) {
+        return usuarioRepository.findByUsuario(username)
+                .map(cuenta -> Usuario.builder()
+                        .usuario(cuenta.getUsuario())
+                        .rol(cuenta.getRol())
+                        .build());
+    }
+
+    @Transactional
     public AuthResponseDTO login(LoginRequest request) {
         String usuario = request.getIdCliente();
 
-        Usuario admin = usuarioRepository.findByUsuario(usuario).orElse(null);
-        if (admin != null && passwordService.coincide(request.getPassword(), admin.getContrasena())) {
+        Usuario cuenta = usuarioRepository.findByUsuario(usuario).orElse(null);
+        if (cuenta != null && passwordService.coincide(request.getPassword(), cuenta.getContrasena())) {
+            if (passwordService.necesitaRehash(cuenta.getContrasena())) {
+                cuenta.setContrasena(passwordService.preparar(request.getPassword()));
+                usuarioRepository.save(cuenta);
+            }
+
             return AuthResponseDTO.builder()
-                    .id(admin.getPersona().getIdPersona())
-                    .nombre(admin.getPersona().getNombre())
-                    .apellido(admin.getPersona().getApellido())
-                    .correo(admin.getPersona().getCorreo())
-                    .telefono(admin.getPersona().getTelefono())
-                    .usuario(admin.getUsuario())
-                    .rol("ADMIN")
+                    .id(cuenta.getPersona().getIdPersona())
+                    .nombre(cuenta.getPersona().getNombre())
+                    .apellido(cuenta.getPersona().getApellido())
+                    .correo(cuenta.getPersona().getCorreo())
+                    .telefono(cuenta.getPersona().getTelefono())
+                    .usuario(cuenta.getUsuario())
+                    .rol(cuenta.getRol())
                     .build();
         }
 
@@ -40,6 +55,11 @@ public class AuthService {
 
         if (!passwordService.coincide(request.getPassword(), cliente.getContrasena())) {
             throw new BusinessException("Credenciales incorrectas");
+        }
+
+        if (passwordService.necesitaRehash(cliente.getContrasena())) {
+            cliente.setContrasena(passwordService.preparar(request.getPassword()));
+            clienteRepository.save(cliente);
         }
 
         return AuthResponseDTO.builder()
