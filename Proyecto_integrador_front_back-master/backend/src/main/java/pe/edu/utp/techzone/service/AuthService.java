@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pe.edu.utp.techzone.dto.AuthResponseDTO;
 import pe.edu.utp.techzone.dto.LoginRequest;
 import pe.edu.utp.techzone.entity.Cliente;
+import pe.edu.utp.techzone.entity.RolUsuario;
 import pe.edu.utp.techzone.entity.Usuario;
 import pe.edu.utp.techzone.exception.BusinessException;
 import pe.edu.utp.techzone.repository.ClienteRepository;
@@ -46,7 +47,7 @@ public class AuthService {
                     .correo(cuenta.getPersona().getCorreo())
                     .telefono(cuenta.getPersona().getTelefono())
                     .usuario(cuenta.getUsuario())
-                    .rol(cuenta.getRol())
+                    .rol(cuenta.getRol().name())
                     .build();
         }
 
@@ -69,7 +70,7 @@ public class AuthService {
                 .correo(cliente.getCorreo())
                 .telefono(cliente.getTelefono())
                 .usuario(cliente.getIdCliente())
-                .rol("CLIENTE")
+                .rol(RolUsuario.CLIENTE.name())
                 .build();
     }
 }

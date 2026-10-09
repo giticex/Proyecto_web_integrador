@@ -2,6 +2,8 @@ package pe.edu.utp.techzone.entity;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -33,7 +35,8 @@ public class Usuario {
     private String contrasena;
 
     @Column(nullable = false, length = 20)
-    private String rol;
+    @Enumerated(EnumType.STRING)
+    private RolUsuario rol;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_persona", referencedColumnName = "id_persona", nullable = false)
