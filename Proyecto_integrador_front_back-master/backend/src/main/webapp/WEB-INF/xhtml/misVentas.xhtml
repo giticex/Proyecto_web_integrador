@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+<h:head>
+    <title>TechZone JSF | Mis ventas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <h:outputStylesheet library="css" name="jsf.css"/>
+</h:head>
+<h:body>
+    <ui:include src="/WEB-INF/xhtml/_navegacion.xhtml"/>
+    <main class="contenedor">
+        <p class="eyebrow">VENDEDOR · JSF</p>
+        <h1>Mis ventas</h1>
+        <div class="indicadores">
+            <article class="indicador"><span>Cantidad de ventas</span><strong>#{vendedorBean.numeroDeVentas}</strong></article>
+            <article class="indicador"><span>Total vendido</span>
+                <strong>S/ <h:outputText value="#{vendedorBean.totalVendido}">
+                    <f:convertNumber minFractionDigits="2" maxFractionDigits="2"/>
+                </h:outputText></strong>
+            </article>
+        </div>
+        <section class="tarjeta">
+            <h2>Historial del usuario <h:outputText value="#{loginBean.usuarioActual.usuario}"/></h2>
+            <h:dataTable value="#{vendedorBean.misVentas}" var="venta"
+                         styleClass="tabla" rowClasses="fila-par,fila-impar">
+                <h:column><f:facet name="header">Comprobante</f:facet><h:outputText value="#{venta.numeroDocumento}"/></h:column>
+                <h:column><f:facet name="header">Cliente</f:facet><h:outputText value="#{venta.cliente}"/></h:column>
+                <h:column><f:facet name="header">Fecha</f:facet><h:outputText value="#{venta.fechaEmision}"/></h:column>
+                <h:column><f:facet name="header">Medio de pago</f:facet><h:outputText value="#{venta.medioPago}"/></h:column>
+                <h:column><f:facet name="header">Importe (S/)</f:facet>
+                    <h:outputText value="#{venta.total}"><f:convertNumber minFractionDigits="2" maxFractionDigits="2"/></h:outputText>
+                </h:column>
+            </h:dataTable>
+            <p class="nota">Solo muestra las ventas registradas con tu cuenta de usuario.</p>
+        </section>
+    </main>
+</h:body>
+</html>

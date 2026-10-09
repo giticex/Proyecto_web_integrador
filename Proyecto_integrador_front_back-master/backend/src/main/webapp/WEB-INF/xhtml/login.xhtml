@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core">
+<h:head>
+    <title>TechZone JSF | Iniciar sesión</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <h:outputStylesheet library="css" name="jsf.css"/>
+</h:head>
+<h:body styleClass="login-fondo">
+    <main class="tarjeta login-tarjeta">
+        <p class="eyebrow">INTEGRANTE 3 · JAVA SERVER FACES</p>
+        <h1>TECH<span>ZONE</span></h1>
+        <p>Acceso de clientes, vendedores y administración</p>
+        <h:form id="formLogin">
+            <h:messages globalOnly="true" styleClass="mensajes" errorClass="error"/>
+            <div class="campos">
+                <div>
+                    <h:outputLabel for="usuario" value="Usuario o ID de cliente"/>
+                    <h:inputText id="usuario" value="#{loginBean.usuario}" required="true"
+                                 requiredMessage="Ingresa el usuario" autocomplete="username"/>
+                    <h:message for="usuario" styleClass="error"/>
+                </div>
+                <div>
+                    <h:outputLabel for="clave" value="Contraseña"/>
+                    <h:inputSecret id="clave" value="#{loginBean.password}" required="true"
+                                   redisplay="false" requiredMessage="Ingresa la contraseña"/>
+                    <h:message for="clave" styleClass="error"/>
+                </div>
+            </div>
+            <h:commandButton value="Ingresar" action="#{loginBean.ingresar}" styleClass="btn btn-principal ancho-total"/>
+        </h:form>
+        <p class="nota">Cuentas de demostración: admin, luisg (vendedor) o CLI001 (cliente),
+            usando las credenciales cargadas en la base de datos local.</p>
+    </main>
+</h:body>
+</html>

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html" xmlns:ui="jakarta.faces.facelets"
+      xmlns:f="jakarta.faces.core">
+<h:head>
+    <title>TechZone JSF | Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <h:outputStylesheet library="css" name="jsf.css"/>
+</h:head>
+<h:body>
+    <ui:include src="/WEB-INF/xhtml/_navegacion.xhtml"/>
+    <main class="contenedor">
+        <p class="eyebrow">ADMINISTRACIÓN · JSF</p>
+        <h1>Dashboard de TechZone</h1>
+        <div class="indicadores">
+            <article class="indicador"><span>Productos</span><strong>#{vendedorBean.resumen.totalProductos}</strong></article>
+            <article class="indicador"><span>Clientes</span><strong>#{vendedorBean.resumen.totalClientes}</strong></article>
+            <article class="indicador"><span>Ventas esta semana</span><strong>#{vendedorBean.resumen.ventasSemana}</strong></article>
+            <article class="indicador"><span>Stock crítico</span><strong>#{vendedorBean.resumen.stockCritico}</strong></article>
+        </div>
+        <section class="tarjeta">
+            <h2>Indicadores comerciales</h2>
+            <p><strong>Ingresos de la semana:</strong> S/ <h:outputText value="#{vendedorBean.resumen.ingresosSemana}">
+                <f:convertNumber minFractionDigits="2" maxFractionDigits="2"/>
+            </h:outputText></p>
+            <p><strong>Ingresos del mes:</strong> S/ <h:outputText value="#{vendedorBean.resumen.ingresosMes}">
+                <f:convertNumber minFractionDigits="2" maxFractionDigits="2"/>
+            </h:outputText></p>
+            <p><strong>Producto más vendido del mes:</strong> #{vendedorBean.resumen.productoMasVendidoMes}</p>
+            <p><strong>Producto más vendido de la semana:</strong> #{vendedorBean.resumen.productoMasVendidoSemana}</p>
+            <p><strong>Productos agotados:</strong> #{vendedorBean.resumen.productosAgotados}</p>
+            <p><strong>Clientes con compras:</strong> #{vendedorBean.resumen.clientesCompraron}</p>
+            <div class="acciones">
+                <h:link value="Administrar clientes" outcome="/jsf/clientes.xhtml" styleClass="btn btn-principal"/>
+                <h:link value="Punto de venta" outcome="/jsf/puntoVenta.xhtml" styleClass="btn btn-secundario"/>
+            </div>
+        </section>
+    </main>
+</h:body>
+</html>

@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface VentaRepository extends JpaRepository<Venta, String> {
     List<Venta> findByClienteIdClienteOrderByFechaEmisionDesc(String idCliente);
+    List<Venta> findByPersonaIdPersonaOrderByFechaEmisionDesc(String idPersona);
     List<Venta> findAllByOrderByFechaEmisionDesc();
 
     @Query(value = """

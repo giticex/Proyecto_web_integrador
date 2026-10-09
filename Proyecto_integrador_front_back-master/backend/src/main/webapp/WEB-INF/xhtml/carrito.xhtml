@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html" xmlns:ui="jakarta.faces.facelets">
+<h:head>
+    <title>TechZone JSF | Carrito</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <h:outputStylesheet library="css" name="jsf.css"/>
+</h:head>
+<h:body>
+    <ui:include src="/WEB-INF/xhtml/_navegacion.xhtml"/>
+    <main class="contenedor">
+        <p class="eyebrow">COMPRAS · JSF</p>
+        <h1>Mi carrito</h1>
+        <ui:include src="/WEB-INF/xhtml/_pedido.xhtml"/>
+        <p><h:link outcome="/jsf/catalogo.xhtml" value="← Seguir comprando"/></p>
+    </main>
+</h:body>
+</html>

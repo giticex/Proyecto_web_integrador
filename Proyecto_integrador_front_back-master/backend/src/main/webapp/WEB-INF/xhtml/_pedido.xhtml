@@ -1,0 +1,105 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html"
+                xmlns:f="jakarta.faces.core">
+    <section class="tarjeta">
+        <h2>Detalle del pedido</h2>
+        <h:form id="formPedido">
+            <h:messages globalOnly="false" layout="list" styleClass="mensajes" infoClass="exito" errorClass="error"/>
+            <h:panelGroup rendered="#{carritoBean.vacio}">
+                <p>El carrito está vacío. Selecciona productos del catálogo o del punto de venta.</p>
+            </h:panelGroup>
+            <h:dataTable value="#{carritoBean.items}" var="item"
+                         rendered="#{not carritoBean.vacio}"
+                         styleClass="tabla" headerClass="tabla-cabecera" rowClasses="fila-par,fila-impar">
+                <h:column>
+                    <f:facet name="header">Producto</f:facet>
+                    <h:outputText value="#{item.producto.nombre}"/>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Precio</f:facet>
+                    <h:outputText value="#{item.producto.precio}">
+                        <f:convertNumber minFractionDigits="2" maxFractionDigits="2"/>
+                    </h:outputText>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Cantidad</f:facet>
+                    <h:inputText value="#{item.cantidad}" size="3" required="true">
+                        <f:validateLongRange minimum="1"/>
+                    </h:inputText>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Subtotal (S/)</f:facet>
+                    <h:outputText value="#{item.subtotal}">
+                        <f:convertNumber minFractionDigits="2" maxFractionDigits="2"/>
+                    </h:outputText>
+                </h:column>
+                <h:column>
+                    <f:facet name="header">Acción</f:facet>
+                    <h:commandButton value="Quitar" styleClass="btn btn-peligro btn-chico"
+                                     action="#{carritoBean.quitar(item.producto.idProducto)}"
+                                     immediate="true">
+                        <f:ajax execute="@this" render="@form"/>
+                    </h:commandButton>
+                </h:column>
+            </h:dataTable>
+
+            <h:panelGroup rendered="#{not carritoBean.vacio}">
+                <div class="acciones">
+                    <h:commandButton value="Actualizar cantidades" styleClass="btn btn-secundario"
+                                     action="#{carritoBean.validarCantidades}">
+                        <f:ajax execute="@form" render="@form"/>
+                    </h:commandButton>
+                    <strong>Total estimado: S/ <h:outputText value="#{carritoBean.total}">
+                        <f:convertNumber minFractionDigits="2" maxFractionDigits="2"/>
+                    </h:outputText></strong>
+                </div>
+                <h3>Confirmación de venta</h3>
+                <div class="campos">
+                    <h:panelGroup rendered="#{loginBean.personal}" layout="block">
+                        <h:outputLabel for="idClienteVenta" value="ID del cliente (por ejemplo CLI001)"/>
+                        <h:inputText id="idClienteVenta" value="#{carritoBean.clienteVentaId}"
+                                     required="#{loginBean.personal}" requiredMessage="Introduce el ID del cliente"/>
+                        <h:message for="idClienteVenta" styleClass="error"/>
+                    </h:panelGroup>
+                    <h:panelGroup rendered="#{loginBean.cliente}" layout="block">
+                        <strong>Cliente: <h:outputText value="#{loginBean.usuarioActual.id}"/></strong>
+                    </h:panelGroup>
+                    <div>
+                        <h:outputLabel for="tipoDocumento" value="Comprobante"/>
+                        <h:selectOneMenu id="tipoDocumento" value="#{carritoBean.tipoDocumento}" required="true">
+                            <f:selectItems value="#{carritoBean.tiposDocumento}" var="tipo"
+                                           itemLabel="#{tipo.nombre}" itemValue="#{tipo.idDocumento}"/>
+                        </h:selectOneMenu>
+                        <h:message for="tipoDocumento" styleClass="error"/>
+                    </div>
+                    <div>
+                        <h:outputLabel for="medioPago" value="Medio de pago"/>
+                        <h:selectOneMenu id="medioPago" value="#{carritoBean.medioPago}" required="true">
+                            <f:selectItems value="#{carritoBean.mediosPago}" var="medio"
+                                           itemLabel="#{medio.descripcion}" itemValue="#{medio.idMedioPago}"/>
+                        </h:selectOneMenu>
+                        <h:message for="medioPago" styleClass="error"/>
+                    </div>
+                </div>
+                <div class="acciones">
+                    <h:commandButton value="Confirmar y registrar venta" styleClass="btn btn-principal"
+                                     action="#{carritoBean.confirmar}">
+                        <f:ajax execute="@form" render="@form"/>
+                    </h:commandButton>
+                </div>
+            </h:panelGroup>
+            <h:panelGroup layout="block" styleClass="comprobante"
+                          rendered="#{not empty carritoBean.ultimaVenta}">
+                <h3>Última venta registrada</h3>
+                <p><b>Comprobante:</b> <h:outputText value="#{carritoBean.ultimaVenta.numeroDocumento}"/></p>
+                <p><b>Cliente:</b> <h:outputText value="#{carritoBean.ultimaVenta.cliente}"/></p>
+                <p><b>Fecha:</b> <h:outputText value="#{carritoBean.ultimaVenta.fechaEmision}"/></p>
+                <p><b>Importe:</b> S/ <h:outputText value="#{carritoBean.ultimaVenta.total}">
+                    <f:convertNumber minFractionDigits="2" maxFractionDigits="2"/>
+                </h:outputText></p>
+                <p class="nota">Comprobante de demostración; no es emisión tributaria electrónica.</p>
+            </h:panelGroup>
+        </h:form>
+    </section>
+</ui:composition>
