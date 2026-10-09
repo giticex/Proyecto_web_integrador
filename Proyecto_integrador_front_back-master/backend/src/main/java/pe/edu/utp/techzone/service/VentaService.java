@@ -42,8 +42,14 @@ public class VentaService {
 
     @Transactional
     public VentaDTO registrar(RegistrarVentaRequest request) {
+        // API React: mantiene el vendedor actual por defecto.
+        return registrar(request, USUARIO_VENDEDOR);
+    }
+
+    @Transactional
+    public VentaDTO registrar(RegistrarVentaRequest request, String usuarioVendedor) {
         Cliente cliente = clienteService.obtenerEntidad(request.getIdCliente());
-        Persona vendedor = usuarioRepository.findByUsuario(USUARIO_VENDEDOR)
+        Persona vendedor = usuarioRepository.findByUsuario(usuarioVendedor)
                 .map(Usuario::getPersona)
                 .orElseThrow(() -> new NotFoundException("Usuario vendedor no encontrado"));
         TipoDocumento tipoDocumento = tipoDocumentoRepository.findById(request.getTipoDocumento())
@@ -101,6 +107,15 @@ public class VentaService {
                 .stream()
                 .map(this::toDTO)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<VentaDTO> historialVendedor(String usuario) {
+        Persona vendedor = usuarioRepository.findByUsuario(usuario)
+                .map(Usuario::getPersona)
+                .orElseThrow(() -> new NotFoundException("Vendedor no encontrado"));
+        return ventaRepository.findByPersonaIdPersonaOrderByFechaEmisionDesc(vendedor.getIdPersona())
+                .stream().map(this::toDTO).toList();
     }
 
     @Transactional(readOnly = true)

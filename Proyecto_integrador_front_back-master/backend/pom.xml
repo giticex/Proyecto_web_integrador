@@ -14,6 +14,7 @@
     <groupId>pe.edu.utp</groupId>
     <artifactId>techzone-backend</artifactId>
     <version>1.0.0</version>
+    <packaging>war</packaging> <!-- se cambió a WAR - Nelsy -->
     <name>techzone-backend</name>
     <description>Backend Spring Boot para Proyecto Integrador</description>
 
@@ -56,6 +57,14 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
+        </dependency>
+
+
+        <!-- JavaServer Faces (JSF) - Nelsy -->
+        <dependency>
+            <groupId>org.joinfaces</groupId>
+            <artifactId>faces-spring-boot-starter</artifactId>
+            <version>6.0.6.1</version>
         </dependency>
 
     </dependencies>

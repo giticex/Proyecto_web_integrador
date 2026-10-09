@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<faces-config
+    xmlns="https://jakarta.ee/xml/ns/jakartaee"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-facesconfig_4_1.xsd"
+    version="4.1">
+
+    <application>
+        <locale-config>
+            <default-locale>es</default-locale>
+        </locale-config>
+
+        <el-resolver>
+            org.springframework.web.jsf.el.SpringBeanFacesELResolver
+        </el-resolver>
+    </application>
+
+    <navigation-rule>
+        <from-view-id>/jsf/*</from-view-id>
+
+        <navigation-case>
+            <from-outcome>irAdmin</from-outcome>
+            <to-view-id>/jsf/dashboard.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>irVendedor</from-outcome>
+            <to-view-id>/jsf/miPanel.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+
+        <navigation-case>
+            <from-outcome>irCliente</from-outcome>
+            <to-view-id>/jsf/catalogo.xhtml</to-view-id>
+            <redirect/>
+        </navigation-case>
+    </navigation-rule>
+</faces-config>

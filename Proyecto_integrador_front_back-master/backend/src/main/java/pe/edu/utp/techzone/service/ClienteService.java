@@ -113,4 +113,21 @@ public class ClienteService {
                 .correo(cliente.getCorreo())
                 .build();
     }
+
+    @Transactional
+    public ClienteDTO actualizar(String id, ClienteDTO dto) {
+        Cliente cliente = obtenerEntidad(id);
+        cliente.setNombre(dto.getNombre());
+        cliente.setApellido(dto.getApellido());
+        cliente.setTelefono(dto.getTelefono());
+        cliente.setCorreo(dto.getCorreo());
+        return toDTO(clienteRepository.save(cliente));
+
+    }
+
+    @Transactional
+    public void eliminar(String id) {
+        Cliente cliente = obtenerEntidad(id);
+        clienteRepository.delete(cliente);
+    }
 }

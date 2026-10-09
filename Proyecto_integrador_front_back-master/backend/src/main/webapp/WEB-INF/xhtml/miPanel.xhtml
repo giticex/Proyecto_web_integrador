@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+<h:head>
+    <title>TechZone JSF | Mi panel</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <h:outputStylesheet library="css" name="jsf.css"/>
+</h:head>
+<h:body>
+    <ui:include src="/WEB-INF/xhtml/_navegacion.xhtml"/>
+    <main class="contenedor">
+        <p class="eyebrow">ESPACIO DEL VENDEDOR · JSF</p>
+        <h1>Bienvenido, <h:outputText value="#{loginBean.nombreCompleto}"/></h1>
+        <div class="indicadores">
+            <article class="indicador"><span>Ventas registradas</span><strong>#{vendedorBean.numeroDeVentas}</strong></article>
+            <article class="indicador"><span>Total vendido</span><strong>S/ <h:outputText value="#{vendedorBean.totalVendido}">
+                <f:convertNumber minFractionDigits="2" maxFractionDigits="2"/>
+            </h:outputText></strong></article>
+        </div>
+        <section class="tarjeta">
+            <h2>Accesos rápidos</h2>
+            <div class="acciones">
+                <h:link outcome="/jsf/puntoVenta.xhtml" value="Registrar venta" styleClass="btn btn-principal"/>
+                <h:link outcome="/jsf/misVentas.xhtml" value="Consultar mis ventas" styleClass="btn btn-secundario"/>
+                <h:link outcome="/jsf/catalogo.xhtml" value="Consultar catálogo" styleClass="btn btn-secundario"/>
+            </div>
+            <h:form rendered="#{loginBean.administrador}">
+                <h:commandButton value="Volver al panel según mi rol" action="#{vendedorBean.navegarPorRol}"
+                                 styleClass="btn btn-secundario"/>
+            </h:form>
+        </section>
+    </main>
+</h:body>
+</html>
