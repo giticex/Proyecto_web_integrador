@@ -64,13 +64,18 @@ public class ClienteService {
         return toDTO(clienteRepository.save(cliente));
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     public ClienteDTO login(LoginRequest request) {
         Cliente cliente = clienteRepository.findById(request.getIdCliente())
                 .orElseThrow(() -> new BusinessException("Credenciales incorrectas"));
 
         if (!passwordService.coincide(request.getPassword(), cliente.getContrasena())) {
             throw new BusinessException("Credenciales incorrectas");
+        }
+
+        if (passwordService.necesitaRehash(cliente.getContrasena())) {
+            cliente.setContrasena(passwordService.preparar(request.getPassword()));
+            clienteRepository.save(cliente);
         }
 
         return toDTO(cliente);

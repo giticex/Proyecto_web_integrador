@@ -32,6 +32,9 @@ public class Usuario {
     @Column(nullable = false, length = 255)
     private String contrasena;
 
+    @Column(nullable = false, length = 20)
+    private String rol;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_persona", referencedColumnName = "id_persona", nullable = false)
     private Persona persona;

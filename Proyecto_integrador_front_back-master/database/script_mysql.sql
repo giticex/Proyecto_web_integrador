@@ -69,6 +69,7 @@ CREATE TABLE usuario (
     id_usuario INT          NOT NULL AUTO_INCREMENT,
     usuario    VARCHAR(50)  NOT NULL,
     contrasena VARCHAR(255) NOT NULL,
+    rol        VARCHAR(20)  NOT NULL DEFAULT 'CLIENTE',
     id_persona VARCHAR(25)  NOT NULL,
     PRIMARY KEY (id_usuario),
     KEY idx_usuario_id_persona (id_persona),
@@ -188,23 +189,23 @@ INSERT INTO persona VALUES
 ('PER015', 'Fernando', 'Lozano', '1995-08-11', 'fernando@gmail.com', '987654335', 'fernandol'),
 ('PERADM', 'Administrador', 'General', '1995-01-01', 'admin@softplex.com', '999999999', 'admin');
 
-INSERT INTO usuario (usuario, contrasena, id_persona) VALUES
-('luisg', '123456', 'PER001'),
-('anat', '123456', 'PER002'),
-('carlosr', '123456', 'PER003'),
-('mariaf', '123456', 'PER004'),
-('pedroc', '123456', 'PER005'),
-('luciam', '123456', 'PER006'),
-('jorgep', '123456', 'PER007'),
-('rosav', '123456', 'PER008'),
-('miguels', '123456', 'PER009'),
-('dianaq', '123456', 'PER010'),
-('joser', '123456', 'PER011'),
-('elenac', '123456', 'PER012'),
-('rauln', '123456', 'PER013'),
-('sofiah', '123456', 'PER014'),
-('fernandol', '123456', 'PER015'),
-('admin', '123456', 'PERADM');
+INSERT INTO usuario (usuario, contrasena, rol, id_persona) VALUES
+('luisg', '123456', 'CLIENTE', 'PER001'),
+('anat', '123456', 'CLIENTE', 'PER002'),
+('carlosr', '123456', 'CLIENTE', 'PER003'),
+('mariaf', '123456', 'CLIENTE', 'PER004'),
+('pedroc', '123456', 'CLIENTE', 'PER005'),
+('luciam', '123456', 'CLIENTE', 'PER006'),
+('jorgep', '123456', 'CLIENTE', 'PER007'),
+('rosav', '123456', 'CLIENTE', 'PER008'),
+('miguels', '123456', 'CLIENTE', 'PER009'),
+('dianaq', '123456', 'CLIENTE', 'PER010'),
+('joser', '123456', 'CLIENTE', 'PER011'),
+('elenac', '123456', 'CLIENTE', 'PER012'),
+('rauln', '123456', 'CLIENTE', 'PER013'),
+('sofiah', '123456', 'CLIENTE', 'PER014'),
+('fernandol', '123456', 'CLIENTE', 'PER015'),
+('admin', '123456', 'ADMIN', 'PERADM');
 
 INSERT INTO cliente VALUES
 ('CLI001', 'Luis', 'García', '987654321', '123456', 'luis@gmail.com'),
