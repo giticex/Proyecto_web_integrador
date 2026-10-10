@@ -20,22 +20,31 @@ public class AuthService {
 
     @Transactional(readOnly = true)
     public AuthResponseDTO login(LoginRequest request) {
-        String usuario = request.getIdCliente();
+        String idIngresado = request.getIdCliente();
 
-        Usuario admin = usuarioRepository.findByUsuario(usuario).orElse(null);
-        if (admin != null && passwordService.coincide(request.getPassword(), admin.getContrasena())) {
+        Usuario empleado = usuarioRepository.findByUsuario(idIngresado).orElse(null);
+        
+        if (empleado != null) {
+            if (!passwordService.coincide(request.getPassword(), empleado.getContrasena())) {
+                throw new BusinessException("Credenciales incorrectas");
+            }
+            
+            String rolUsuario = (empleado.getRol() != null && !empleado.getRol().trim().isEmpty()) 
+                                ? empleado.getRol().toUpperCase() 
+                                : "VENDEDOR";
+
             return AuthResponseDTO.builder()
-                    .id(admin.getPersona().getIdPersona())
-                    .nombre(admin.getPersona().getNombre())
-                    .apellido(admin.getPersona().getApellido())
-                    .correo(admin.getPersona().getCorreo())
-                    .telefono(admin.getPersona().getTelefono())
-                    .usuario(admin.getUsuario())
-                    .rol("ADMIN")
+                    .id(empleado.getPersona().getIdPersona())
+                    .nombre(empleado.getPersona().getNombre())
+                    .apellido(empleado.getPersona().getApellido())
+                    .correo(empleado.getPersona().getCorreo())
+                    .telefono(empleado.getPersona().getTelefono())
+                    .usuario(empleado.getUsuario())
+                    .rol(rolUsuario)
                     .build();
         }
 
-        Cliente cliente = clienteRepository.findById(usuario)
+        Cliente cliente = clienteRepository.findById(idIngresado)
                 .orElseThrow(() -> new BusinessException("Credenciales incorrectas"));
 
         if (!passwordService.coincide(request.getPassword(), cliente.getContrasena())) {
