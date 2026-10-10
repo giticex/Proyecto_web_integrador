@@ -11,8 +11,6 @@ import pe.edu.utp.techzone.exception.BusinessException;
 import pe.edu.utp.techzone.repository.ClienteRepository;
 import pe.edu.utp.techzone.repository.UsuarioRepository;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -20,46 +18,37 @@ public class AuthService {
     private final ClienteRepository clienteRepository;
     private final PasswordService passwordService;
 
-    public Optional<Usuario> buscarUsuarioConRol(String username) {
-        return usuarioRepository.findByUsuario(username)
-                .map(cuenta -> Usuario.builder()
-                        .usuario(cuenta.getUsuario())
-                        .rol(cuenta.getRol())
-                        .build());
-    }
-
-    @Transactional
+    @Transactional(readOnly = true)
     public AuthResponseDTO login(LoginRequest request) {
-        String usuario = request.getIdCliente();
+        String idIngresado = request.getIdCliente();
 
-        Usuario cuenta = usuarioRepository.findByUsuario(usuario).orElse(null);
-        if (cuenta != null && passwordService.coincide(request.getPassword(), cuenta.getContrasena())) {
-            if (passwordService.necesitaRehash(cuenta.getContrasena())) {
-                cuenta.setContrasena(passwordService.preparar(request.getPassword()));
-                usuarioRepository.save(cuenta);
+        Usuario empleado = usuarioRepository.findByUsuario(idIngresado).orElse(null);
+        
+        if (empleado != null) {
+            if (!passwordService.coincide(request.getPassword(), empleado.getContrasena())) {
+                throw new BusinessException("Credenciales incorrectas");
             }
+            
+            String rolUsuario = (empleado.getRol() != null && !empleado.getRol().trim().isEmpty()) 
+                                ? empleado.getRol().toUpperCase() 
+                                : "VENDEDOR";
 
             return AuthResponseDTO.builder()
-                    .id(cuenta.getPersona().getIdPersona())
-                    .nombre(cuenta.getPersona().getNombre())
-                    .apellido(cuenta.getPersona().getApellido())
-                    .correo(cuenta.getPersona().getCorreo())
-                    .telefono(cuenta.getPersona().getTelefono())
-                    .usuario(cuenta.getUsuario())
-                    .rol(cuenta.getRol())
+                    .id(empleado.getPersona().getIdPersona())
+                    .nombre(empleado.getPersona().getNombre())
+                    .apellido(empleado.getPersona().getApellido())
+                    .correo(empleado.getPersona().getCorreo())
+                    .telefono(empleado.getPersona().getTelefono())
+                    .usuario(empleado.getUsuario())
+                    .rol(rolUsuario)
                     .build();
         }
 
-        Cliente cliente = clienteRepository.findById(usuario)
+        Cliente cliente = clienteRepository.findById(idIngresado)
                 .orElseThrow(() -> new BusinessException("Credenciales incorrectas"));
 
         if (!passwordService.coincide(request.getPassword(), cliente.getContrasena())) {
             throw new BusinessException("Credenciales incorrectas");
-        }
-
-        if (passwordService.necesitaRehash(cliente.getContrasena())) {
-            cliente.setContrasena(passwordService.preparar(request.getPassword()));
-            clienteRepository.save(cliente);
         }
 
         return AuthResponseDTO.builder()
