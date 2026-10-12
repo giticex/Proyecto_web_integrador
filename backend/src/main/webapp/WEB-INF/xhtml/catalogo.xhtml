@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+<h:head>
+    <title>TechZone JSF | Catálogo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <h:outputStylesheet library="css" name="jsf.css"/>
+</h:head>
+<h:body>
+    <ui:include src="/WEB-INF/xhtml/_navegacion.xhtml"/>
+    <main class="contenedor">
+        <p class="eyebrow">TIENDA · JSF</p>
+        <h1>Catálogo de productos</h1>
+        <section class="tarjeta">
+            <h:form id="formCatalogo">
+                <h:messages globalOnly="true" styleClass="mensajes" errorClass="error" infoClass="exito"/>
+                <div class="buscador">
+                    <h:outputLabel for="buscar" value="Buscar productos"/>
+                    <h:inputText id="buscar" value="#{catalogoBean.busqueda}" autocomplete="off">
+                        <f:ajax event="keyup" execute="@this" render="tablaProductos"/>
+                    </h:inputText>
+                    <h:commandButton value="Buscar" styleClass="btn btn-secundario">
+                        <f:ajax execute="@this buscar" render="tablaProductos"/>
+                    </h:commandButton>
+                </div>
+                <h:panelGroup id="tablaProductos" layout="block">
+                    <h:dataTable value="#{catalogoBean.productosFiltrados}" var="p"
+                                 styleClass="tabla" rowClasses="fila-par,fila-impar">
+                        <h:column><f:facet name="header">Código</f:facet><h:outputText value="#{p.idProducto}"/></h:column>
+                        <h:column><f:facet name="header">Nombre</f:facet><h:outputText value="#{p.nombre}"/></h:column>
+                        <h:column><f:facet name="header">Categoría</f:facet><h:outputText value="#{p.categoria}"/></h:column>
+                        <h:column><f:facet name="header">Precio (S/)</f:facet>
+                            <h:outputText value="#{p.precio}">
+                                <f:convertNumber minFractionDigits="2" maxFractionDigits="2"/>
+                            </h:outputText>
+                        </h:column>
+                        <h:column><f:facet name="header">Stock</f:facet><h:outputText value="#{p.stock}"/></h:column>
+                        <h:column>
+                            <f:facet name="header">Comprar</f:facet>
+                            <h:commandButton value="Agregar" action="#{catalogoBean.agregarAlCarrito(p.idProducto)}"
+                                             disabled="#{p.stock le 0}" styleClass="btn btn-principal btn-chico">
+                                <f:ajax execute="@this" render="@form"/>
+                            </h:commandButton>
+                        </h:column>
+                    </h:dataTable>
+                </h:panelGroup>
+            </h:form>
+        </section>
+        <p>Productos en carrito: <b><h:outputText value="#{carritoBean.cantidadItems}"/></b>.
+            <h:link outcome="/jsf/carrito.xhtml" value="Ver carrito" rendered="#{loginBean.cliente or loginBean.administrador}"/>
+            <h:link outcome="/jsf/puntoVenta.xhtml" value="Ir a punto de venta" rendered="#{loginBean.vendedor}"/>
+        </p>
+    </main>
+</h:body>
+</html>
