@@ -22,7 +22,7 @@ public class VendedorServlet extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/views/mi_panel.jsp").forward(request, response);
         } else {
             // Si no tiene el rol, se le bloquea y redirige al login o error
-            request.getRequestDispatcher("/WEB-INF/views/error/404.jsp").forward(request, response);
+            response.sendRedirect(request.getContextPath() + "/WEB-INF/views/error/404.jsp");
         }
     }
 

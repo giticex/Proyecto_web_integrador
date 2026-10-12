@@ -1,23 +1,13 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <html>
 <head>
     <title>Catálogo - TechZone</title>
 </head>
-<body style="font-family: Arial; padding: 30px;">
-    <h1>Catálogo de Productos - TechZone</h1>
-    <p>Bienvenido, <b>${sessionScope.usuario}</b> (<c:out value="${sessionScope.rol}" default="cliente"/>)</p>
-    <hr>
-    
-    <h3>Productos Disponibles:</h3>
-    <ul>
-        <%-- Ejemplo dinámico con JSTL para evitar duplicidad de código HTML --%>
-        <c:forEach var="producto" items="${productos}">
-            <li>${producto.nombre} - $${producto.precio}</li>
-        </c:forEach>
-    </ul>
-    
+<body style="font-family: Arial; text-align: center; padding: 50px;">
+    <h1 style="color: red; font-size: 50px;">404</h1>
+    <h2>Página no encontrada o acceso denegado</h2>
+    <p>No tienes los permisos necesarios para ver esta sección o la ruta no existe.</p>
     <br>
-    <a href="${pageContext.request.contextPath}/logout">Cerrar Sesión</a>
+    <a href="${pageContext.request.contextPath}/login">Ir al Login</a>
 </body>
 </html>
