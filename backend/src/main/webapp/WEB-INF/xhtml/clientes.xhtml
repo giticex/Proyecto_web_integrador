@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+<h:head>
+    <title>TechZone JSF | CRUD Clientes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <h:outputStylesheet library="css" name="jsf.css"/>
+</h:head>
+<h:body>
+    <ui:include src="/WEB-INF/xhtml/_navegacion.xhtml"/>
+    <main class="contenedor">
+        <p class="eyebrow">ADMINISTRACIÓN · CRUD JSF COMPLETO</p>
+        <h1>Gestión de clientes</h1>
+        <h:form id="formClientes">
+            <h:messages globalOnly="true" styleClass="mensajes" infoClass="exito" errorClass="error"/>
+            <section class="tarjeta">
+                <h2><h:outputText value="#{clienteBean.editando ? 'Editar cliente' : 'Registrar cliente'}"/></h2>
+                <div class="campos">
+                    <div>
+                        <h:outputLabel for="idCliente" value="ID de cliente (ej.: CLI016)"/>
+                        <h:inputText id="idCliente" value="#{clienteBean.clienteSeleccionado.idCliente}"
+                                     readonly="#{clienteBean.editando}" required="true" maxlength="20"
+                                     requiredMessage="El ID es obligatorio"/>
+                        <h:message for="idCliente" styleClass="error"/>
+                    </div>
+                    <div>
+                        <h:outputLabel for="nombre" value="Nombre"/>
+                        <h:inputText id="nombre" value="#{clienteBean.clienteSeleccionado.nombre}"
+                                     required="true" maxlength="50" requiredMessage="El nombre es obligatorio"/>
+                        <h:message for="nombre" styleClass="error"/>
+                    </div>
+                    <div>
+                        <h:outputLabel for="apellido" value="Apellido"/>
+                        <h:inputText id="apellido" value="#{clienteBean.clienteSeleccionado.apellido}"
+                                     required="true" maxlength="50" requiredMessage="El apellido es obligatorio"/>
+                        <h:message for="apellido" styleClass="error"/>
+                    </div>
+                    <div>
+                        <h:outputLabel for="telefono" value="Teléfono"/>
+                        <h:inputText id="telefono" value="#{clienteBean.clienteSeleccionado.telefono}" maxlength="15"/>
+                    </div>
+                    <div>
+                        <h:outputLabel for="correo" value="Correo electrónico"/>
+                        <h:inputText id="correo" value="#{clienteBean.clienteSeleccionado.correo}" maxlength="100"/>
+                    </div>
+                    <h:panelGroup layout="block" rendered="#{not clienteBean.editando}">
+                        <h:outputLabel for="claveNueva" value="Contraseña inicial"/>
+                        <h:inputSecret id="claveNueva" value="#{clienteBean.clienteSeleccionado.password}"
+                                       required="#{not clienteBean.editando}" redisplay="false"
+                                       requiredMessage="Debes establecer una contraseña"/>
+                        <h:message for="claveNueva" styleClass="error"/>
+                    </h:panelGroup>
+                </div>
+                <div class="acciones">
+                    <h:commandButton value="#{clienteBean.editando ? 'Actualizar' : 'Guardar'}"
+                                     styleClass="btn btn-principal" action="#{clienteBean.guardar}">
+                        <f:ajax execute="@form" render="@form"/>
+                    </h:commandButton>
+                    <h:commandButton value="Nuevo / limpiar" styleClass="btn btn-secundario"
+                                     action="#{clienteBean.nuevo}" immediate="true">
+                        <f:ajax execute="@this" render="@form"/>
+                    </h:commandButton>
+                </div>
+            </section>
+            <section class="tarjeta">
+                <div class="acciones">
+                    <h2>Clientes registrados</h2>
+                    <h:commandButton value="Actualizar lista" styleClass="btn btn-secundario btn-chico"
+                                     action="#{clienteBean.cargarClientes}" immediate="true">
+                        <f:ajax execute="@this" render="@form"/>
+                    </h:commandButton>
+                </div>
+                <h:dataTable value="#{clienteBean.clientes}" var="c"
+                             styleClass="tabla" headerClass="tabla-cabecera" rowClasses="fila-par,fila-impar">
+                    <h:column><f:facet name="header">ID</f:facet><h:outputText value="#{c.idCliente}"/></h:column>
+                    <h:column><f:facet name="header">Nombre</f:facet><h:outputText value="#{c.nombre}"/></h:column>
+                    <h:column><f:facet name="header">Apellido</f:facet><h:outputText value="#{c.apellido}"/></h:column>
+                    <h:column><f:facet name="header">Teléfono</f:facet><h:outputText value="#{c.telefono}"/></h:column>
+                    <h:column><f:facet name="header">Correo</f:facet><h:outputText value="#{c.correo}"/></h:column>
+                    <h:column>
+                        <f:facet name="header">Acciones</f:facet>
+                        <h:commandButton value="Editar" styleClass="btn btn-secundario btn-chico"
+                                         action="#{clienteBean.seleccionar(c)}" immediate="true">
+                            <f:ajax execute="@this" render="@form"/>
+                        </h:commandButton>
+                        <h:outputText value=" "/>
+                        <h:commandButton value="Eliminar" styleClass="btn btn-peligro btn-chico"
+                                         action="#{clienteBean.eliminar(c.idCliente)}"
+                                         immediate="true" onclick="return confirm('¿Eliminar este cliente?');">
+                            <f:ajax execute="@this" render="@form"/>
+                        </h:commandButton>
+                    </h:column>
+                </h:dataTable>
+                <p class="nota">MySQL impide eliminar clientes con ventas relacionadas para no perder el historial.</p>
+            </section>
+        </h:form>
+    </main>
+</h:body>
+</html>

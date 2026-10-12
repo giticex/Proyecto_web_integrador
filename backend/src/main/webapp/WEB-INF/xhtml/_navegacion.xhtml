@@ -1,0 +1,22 @@
+<ui:composition xmlns="http://www.w3.org/1999/xhtml"
+                xmlns:ui="jakarta.faces.facelets"
+                xmlns:h="jakarta.faces.html">
+    <header class="topbar">
+        <div class="marca">TECH<span>ZONE</span> <small>JSF</small></div>
+        <nav class="enlaces">
+            <h:link outcome="/jsf/catalogo.xhtml" value="Catálogo" rendered="#{loginBean.autenticado}"/>
+            <h:link outcome="/jsf/carrito.xhtml" value="Carrito" rendered="#{loginBean.cliente or loginBean.administrador}"/>
+            <h:link outcome="/jsf/clientes.xhtml" value="Clientes" rendered="#{loginBean.administrador}"/>
+            <h:link outcome="/jsf/dashboard.xhtml" value="Dashboard" rendered="#{loginBean.administrador}"/>
+            <h:link outcome="/jsf/miPanel.xhtml" value="Mi panel" rendered="#{loginBean.personal}"/>
+            <h:link outcome="/jsf/puntoVenta.xhtml" value="Punto de venta" rendered="#{loginBean.personal}"/>
+            <h:link outcome="/jsf/misVentas.xhtml" value="Mis ventas" rendered="#{loginBean.personal}"/>
+        </nav>
+        <div class="sesion" >
+            <h:outputText value="#{loginBean.nombreCompleto}" rendered="#{loginBean.autenticado}"/>
+            <h:form rendered="#{loginBean.autenticado}">
+                <h:commandButton value="Salir" action="#{loginBean.cerrarSesion}" styleClass="btn btn-secundario btn-chico"/>
+            </h:form>
+        </div>
+    </header>
+</ui:composition>

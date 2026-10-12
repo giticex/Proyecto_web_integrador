@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="jakarta.faces.html" xmlns:f="jakarta.faces.core"
+      xmlns:ui="jakarta.faces.facelets">
+<h:head>
+    <title>TechZone JSF | Punto de venta</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <h:outputStylesheet library="css" name="jsf.css"/>
+</h:head>
+<h:body>
+    <ui:include src="/WEB-INF/xhtml/_navegacion.xhtml"/>
+    <main class="contenedor">
+        <p class="eyebrow">VENDEDOR · JSF</p>
+        <h1>Punto de venta</h1>
+        <section class="tarjeta">
+            <h2>Agregar un producto</h2>
+            <h:form id="formVendedor">
+                <h:messages globalOnly="true" styleClass="mensajes" infoClass="exito" errorClass="error"/>
+                <div class="campos">
+                    <div>
+                        <h:outputLabel for="seleccionarProducto" value="Producto disponible"/>
+                        <h:selectOneMenu id="seleccionarProducto" value="#{vendedorBean.idProducto}"
+                                         required="true" requiredMessage="Selecciona un producto">
+                            <f:selectItem itemLabel="-- Seleccionar producto --" itemValue="" noSelectionOption="true"/>
+                            <f:selectItems value="#{vendedorBean.productosDisponibles}" var="producto"
+                                           itemLabel="#{producto.nombre} (stock #{producto.stock})"
+                                           itemValue="#{producto.idProducto}"/>
+                        </h:selectOneMenu>
+                        <h:message for="seleccionarProducto" styleClass="error"/>
+                    </div>
+                    <div>
+                        <h:outputLabel for="cantidad" value="Cantidad"/>
+                        <h:inputText id="cantidad" value="#{vendedorBean.cantidad}" required="true">
+                            <f:validateLongRange minimum="1"/>
+                        </h:inputText>
+                        <h:message for="cantidad" styleClass="error"/>
+                    </div>
+                </div>
+                <div class="acciones">
+                    <h:commandButton value="Agregar al pedido" styleClass="btn btn-principal"
+                                     action="#{vendedorBean.agregarAlPedido}">
+                        <f:ajax execute="@form" render="@form :formPedido"/>
+                    </h:commandButton>
+                </div>
+            </h:form>
+        </section>
+        <ui:include src="/WEB-INF/xhtml/_pedido.xhtml"/>
+        <p class="nota">La venta se registra con el usuario vendedor de la sesión;
+            el cliente se selecciona mediante su ID registrado.</p>
+    </main>
+</h:body>
+</html>
