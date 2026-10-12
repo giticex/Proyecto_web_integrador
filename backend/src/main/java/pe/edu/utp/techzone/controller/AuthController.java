@@ -1,5 +1,6 @@
 package pe.edu.utp.techzone.controller;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,7 +18,10 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public AuthResponseDTO login(@Valid @RequestBody LoginRequest request) {
-        return authService.login(request);
+    public AuthResponseDTO login(@Valid @RequestBody LoginRequest request, HttpServletRequest http) {
+        AuthResponseDTO respuesta = authService.login(request);
+        http.getSession(true).setAttribute("rol", respuesta.getRol());
+        http.getSession(true).setAttribute("usuario", respuesta.getUsuario());
+        return respuesta;
     }
 }
