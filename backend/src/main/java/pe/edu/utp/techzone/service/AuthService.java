@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pe.edu.utp.techzone.dto.AuthResponseDTO;
 import pe.edu.utp.techzone.dto.LoginRequest;
 import pe.edu.utp.techzone.entity.Cliente;
+import pe.edu.utp.techzone.entity.RolUsuario;
 import pe.edu.utp.techzone.entity.Usuario;
 import pe.edu.utp.techzone.exception.BusinessException;
 import pe.edu.utp.techzone.repository.ClienteRepository;
@@ -29,9 +30,9 @@ public class AuthService {
                 throw new BusinessException("Credenciales incorrectas");
             }
             
-            String rolUsuario = (empleado.getRol() != null && !empleado.getRol().trim().isEmpty()) 
-                                ? empleado.getRol().toUpperCase() 
-                                : "VENDEDOR";
+            String rolUsuario = empleado.getRol() != null
+                                ? empleado.getRol().name()
+                                : RolUsuario.VENDEDOR.name();
 
             return AuthResponseDTO.builder()
                     .id(empleado.getPersona().getIdPersona())
@@ -58,7 +59,7 @@ public class AuthService {
                 .correo(cliente.getCorreo())
                 .telefono(cliente.getTelefono())
                 .usuario(cliente.getIdCliente())
-                .rol("CLIENTE")
+                .rol(RolUsuario.CLIENTE.name())
                 .build();
     }
 }
