@@ -42,6 +42,10 @@ public class Venta {
     @Column(name = "numero_documento", nullable = false, length = 36)
     private String numeroDocumento;
 
+    // Documento de identidad del comprador (DNI/RUC), distinto del número de comprobante
+    @Column(name = "numero_documento_cliente", length = 15)
+    private String numeroDocumentoCliente;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_medio_pago", referencedColumnName = "id_medio_pago", nullable = false)
     private MedioPago medioPago;

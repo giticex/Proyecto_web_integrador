@@ -19,6 +19,7 @@ public class VentaDTO {
     private String cliente;
     private String tipoDocumento;
     private String numeroDocumento;
+    private String numeroDocumentoCliente;
     private String medioPago;
     private LocalDateTime fechaEmision;
     private BigDecimal total;

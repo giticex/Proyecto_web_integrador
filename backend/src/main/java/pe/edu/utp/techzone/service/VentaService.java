@@ -58,11 +58,9 @@ public class VentaService {
                 .orElseThrow(() -> new NotFoundException("Medio de pago no encontrado"));
 
         String idVenta = UUID.randomUUID().toString();
-        String numeroDocumento = request.getNumeroDocumento();
-        if (numeroDocumento == null || numeroDocumento.isBlank()) {
-            String serie = "TD002".equals(request.getTipoDocumento()) ? "F001" : "B001";
-            numeroDocumento = serie + "-" + idVenta.substring(0, 8).toUpperCase();
-        }
+        // Serie oficial SUNAT: F001 para Facturas (TD002), B001 para Boletas (TD001)
+        String serie = "TD002".equals(request.getTipoDocumento()) ? "F001" : "B001";
+        String numeroDocumento = generarNumeroComprobante(serie);
 
         Venta venta = Venta.builder()
                 .idVenta(idVenta)
@@ -70,6 +68,7 @@ public class VentaService {
                 .persona(vendedor)
                 .tipoDocumento(tipoDocumento)
                 .numeroDocumento(numeroDocumento)
+                .numeroDocumentoCliente(request.getNumeroDocumento())
                 .medioPago(medioPago)
                 .fechaEmision(LocalDateTime.now())
                 .build();
@@ -92,6 +91,12 @@ public class VentaService {
         }
 
         return buscar(idVenta);
+    }
+
+    /** Genera el número de comprobante oficial con formato SERIE-CORRELATIVO (correlativo de 8 dígitos). */
+    private String generarNumeroComprobante(String serie) {
+        long siguiente = ventaRepository.maxCorrelativoPorSerie(serie) + 1;
+        return serie + "-" + String.format("%08d", siguiente);
     }
 
     @Transactional(readOnly = true)
@@ -148,6 +153,7 @@ public class VentaService {
                 .cliente(venta.getCliente().getNombre() + " " + venta.getCliente().getApellido())
                 .tipoDocumento(venta.getTipoDocumento().getNombre())
                 .numeroDocumento(venta.getNumeroDocumento())
+                .numeroDocumentoCliente(venta.getNumeroDocumentoCliente())
                 .medioPago(venta.getMedioPago().getDescripcion())
                 .fechaEmision(venta.getFechaEmision())
                 .total(total)

@@ -2,6 +2,7 @@ package pe.edu.utp.techzone.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import pe.edu.utp.techzone.entity.Venta;
 
 import java.math.BigDecimal;
@@ -11,6 +12,13 @@ public interface VentaRepository extends JpaRepository<Venta, String> {
     List<Venta> findByClienteIdClienteOrderByFechaEmisionDesc(String idCliente);
     List<Venta> findByPersonaIdPersonaOrderByFechaEmisionDesc(String idPersona);
     List<Venta> findAllByOrderByFechaEmisionDesc();
+
+    @Query(value = """
+        SELECT COALESCE(MAX(CAST(SUBSTRING_INDEX(numero_documento, '-', -1) AS UNSIGNED)), 0)
+        FROM venta
+        WHERE numero_documento LIKE CONCAT(:serie, '-%')
+        """, nativeQuery = true)
+    long maxCorrelativoPorSerie(@Param("serie") String serie);
 
     @Query(value = """
         SELECT COALESCE(p.nombre, 'Sin ventas')
