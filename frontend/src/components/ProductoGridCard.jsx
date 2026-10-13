@@ -3,11 +3,24 @@ import { Check, ShoppingCart } from 'lucide-react';
 import { formatoMoneda } from '../utils/format';
 import { obtenerImagenProducto } from '../utils/productImages';
 
-export default function ProductoGridCard({ producto, onAgregar }) {
+export default function ProductoGridCard({ producto, onAgregar, mostrarStockExacto = true }) {
   const [agregado, setAgregado] = useState(false);
   const stockNum = Number(producto.stock || 0);
   const agotado = stockNum <= 0;
-  const stockBajo = stockNum > 0 && stockNum <= 10;
+  const umbralBajo = mostrarStockExacto ? 10 : 3;
+  const stockBajo = stockNum > 0 && stockNum <= umbralBajo;
+  const claseStock = agotado ? 'agotado' : stockBajo ? 'stockBajo' : 'disponible';
+  const textoStock = mostrarStockExacto
+    ? agotado
+      ? 'Agotado'
+      : stockBajo
+        ? `¡Últimas ${stockNum} unids!`
+        : `${stockNum} disponibles`
+    : agotado
+      ? 'Agotado'
+      : stockBajo
+        ? '¡Últimas unidades!'
+        : 'Disponible';
   const imagenUrl = obtenerImagenProducto(producto);
 
   function handleAgregar() {
@@ -30,9 +43,7 @@ export default function ProductoGridCard({ producto, onAgregar }) {
             e.target.src = 'https://images.unsplash.com/photo-1550009158-9ebf69173e03?w=600&auto=format&fit=crop&q=80';
           }}
         />
-        <span className={`stockTag ${agotado ? 'agotado' : stockBajo ? 'stockBajo' : 'disponible'}`}>
-          {agotado ? 'Agotado' : stockBajo ? `¡Últimas ${stockNum} unids!` : `${stockNum} disponibles`}
-        </span>
+        <span className={`stockTag ${claseStock}`}>{textoStock}</span>
       </div>
 
       <div className="productoInfo">

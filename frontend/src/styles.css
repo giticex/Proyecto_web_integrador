@@ -439,17 +439,39 @@ table button:hover,
 
 .stockTag {
   position: absolute;
-  right: 14px;
-  top: 14px;
-  background: rgba(255, 255, 255, 0.9);
-  color: var(--primaryDark);
-  border-radius: 999px;
-  padding: 7px 10px;
-  font-weight: 800;
+  top: 10px;
+  right: 10px;
+  bottom: auto;
+  left: auto;
+  width: auto;
+  height: auto;
+  display: inline-block;
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+  background: rgba(220, 252, 231, 0.9);
+  color: #15803d;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  z-index: 2;
+}
+
+.stockTag.disponible {
+  background: rgba(220, 252, 231, 0.9);
+  color: #15803d;
+}
+
+.stockTag.stockBajo {
+  background: rgba(254, 243, 199, 0.92);
+  color: #b45309;
 }
 
 .stockTag.agotado {
-  color: var(--danger);
+  background: rgba(254, 226, 226, 0.92);
+  color: #b91c1c;
 }
 
 .productoInfo {
@@ -551,6 +573,52 @@ th {
 .resumenPagoModerno {
   position: sticky;
   top: 24px;
+}
+
+.resumenItems {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.resumenItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.resumenItemInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.resumenItemInfo strong {
+  font-size: 0.9rem;
+}
+
+.resumenItemInfo span {
+  font-size: 0.78rem;
+  color: #667085;
+}
+
+.resumenItemAcciones {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.resumenItemAcciones .cantidadInput {
+  width: 64px;
 }
 
 .pagoIcono {
@@ -769,7 +837,6 @@ th {
 
 @media (max-width: 1100px) {
   .loginShell,
-  .appLayout,
   .carritoLayout,
   .dashboardGrid,
   .adminGridDos,
@@ -782,16 +849,6 @@ th {
 
   .authCardModerna {
     justify-self: stretch;
-  }
-
-  .sidebar {
-    height: auto;
-    position: static;
-  }
-
-  .menu {
-    flex-direction: row;
-    overflow: auto;
   }
 
   .contenido,
@@ -839,5 +896,1403 @@ th {
 
   body {
     background: white;
+  }
+}
+
+/* ============================================================
+   POS INDUSTRIAL TECHzone - Punto de Venta (Caja de alta velocidad)
+   ============================================================ */
+:root {
+  --tz-blue-dark: #0f172a;
+  --tz-blue-main: #1e3a8a;
+  --tz-blue-accent: #2563eb;
+  --tz-cyan-bright: #22d3ee;
+  --tz-green-cash: #16a34a;
+}
+
+.posShell {
+  height: calc(100vh - 64px);
+  min-height: 560px;
+  display: flex;
+  flex-direction: column;
+  background: #e2e8f0;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+}
+
+.posHeader {
+  background: var(--tz-blue-dark);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 14px 20px;
+  flex-wrap: wrap;
+}
+
+.posBrand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.posBrand svg {
+  color: var(--tz-cyan-bright);
+}
+
+.posBrand strong {
+  font-size: 1.2rem;
+  letter-spacing: 0.5px;
+}
+
+.posBrand span {
+  color: #94a3b8;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+}
+
+.posSearch {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 280px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 11px 16px;
+  border: 2px solid transparent;
+  transition: box-shadow 0.15s;
+}
+
+.posSearch:focus-within {
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.5);
+}
+
+.posSearch svg {
+  color: var(--tz-blue-main);
+  flex-shrink: 0;
+}
+
+.posSearch input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: var(--tz-blue-dark);
+  font-size: 1.02rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.posSearch input::placeholder {
+  color: #94a3b8;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.posBody {
+  flex: 1;
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  min-height: 0;
+}
+
+.posLeft {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: #f1f5f9;
+}
+
+.posTableWrap {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 14px;
+}
+
+.posTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.posTable thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--tz-blue-main);
+  color: #fff;
+  font-size: 0.72rem;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding: 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.posTable td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 0.95rem;
+  vertical-align: middle;
+}
+
+.posTable tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+
+.posColNum {
+  width: 44px;
+  color: #64748b;
+  font-weight: 700;
+}
+
+.posDesc {
+  font-weight: 600;
+}
+
+.posUnit,
+.posSub {
+  white-space: nowrap;
+}
+
+.posSub {
+  font-weight: 800;
+  color: var(--tz-blue-main);
+}
+
+.posStepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  background: #fff;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 2px;
+}
+
+.posStepper button {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: #f1f5f9;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  color: var(--tz-blue-main);
+}
+
+.posStepper button:hover {
+  background: #dbeafe;
+}
+
+.posStepper span {
+  min-width: 32px;
+  text-align: center;
+  font-weight: 800;
+}
+
+.posDelete {
+  border: none;
+  background: #fee2e2;
+  color: var(--danger);
+  width: 32px;
+  height: 32px;
+  border-radius: 9px;
+  display: grid;
+  place-items: center;
+}
+
+.posDelete:hover {
+  background: #fecaca;
+}
+
+.posEmpty {
+  padding: 48px 16px;
+  text-align: center;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.posFaja {
+  background: var(--tz-blue-dark);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 24px;
+}
+
+.posFajaItems {
+  font-weight: 800;
+  letter-spacing: 1px;
+  color: #cbd5e1;
+  font-size: 1rem;
+}
+
+.posFajaTotal {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--tz-cyan-bright);
+  letter-spacing: 0.5px;
+}
+
+.posRight {
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px;
+  overflow-y: auto;
+}
+
+.posField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.posField > label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #475569;
+}
+
+.posField select,
+.posField input {
+  width: 100%;
+  padding: 11px 12px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  font-weight: 600;
+  outline: none;
+}
+
+.posField select:focus,
+.posField input:focus {
+  border-color: var(--tz-blue-accent);
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.posRow2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.posChips {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.posChip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 12px 8px;
+  border-radius: 11px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  font-weight: 800;
+  color: #334155;
+  font-size: 0.85rem;
+}
+
+.posChip:hover {
+  border-color: var(--tz-blue-accent);
+}
+
+.posChip.activo {
+  background: var(--tz-blue-accent);
+  border-color: var(--tz-blue-accent);
+  color: #fff;
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+}
+
+.posVuelto {
+  background: var(--tz-green-cash);
+  color: #fff;
+  border-radius: 12px;
+  padding: 12px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.posVuelto span {
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  opacity: 0.9;
+}
+
+.posVuelto strong {
+  font-size: 1.5rem;
+  font-weight: 900;
+}
+
+.posVuelto.negativo {
+  background: var(--danger);
+}
+
+.posFiscal {
+  margin-top: auto;
+  border-top: 1px dashed #cbd5e1;
+  padding-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.posFiscal > div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #64748b;
+}
+
+.posFiscal .posFiscalTotal {
+  font-size: 1.05rem;
+  color: var(--tz-blue-dark);
+  align-items: center;
+}
+
+.posFiscal .posFiscalTotal strong {
+  color: var(--tz-blue-main);
+  font-size: 1.3rem;
+}
+
+.posError {
+  color: var(--danger);
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.posAlert {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.posActions {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 10px;
+}
+
+.posBtnCancelar {
+  padding: 14px;
+  border-radius: 12px;
+  border: 1px solid #cbd5e1;
+  background: #e2e8f0;
+  color: #334155;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+}
+
+.posBtnCancelar:hover {
+  background: #cbd5e1;
+}
+
+.posBtnCobrar {
+  padding: 14px;
+  border: none;
+  border-radius: 12px;
+  background: var(--tz-green-cash);
+  color: #fff;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  font-size: 1rem;
+  box-shadow: 0 10px 22px rgba(22, 163, 74, 0.35);
+}
+
+.posBtnCobrar:hover {
+  background: #15803d;
+}
+
+.posBtnCobrar:disabled {
+  background: #94a3b8;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1100px) {
+  .posShell {
+    height: auto;
+  }
+
+  .posBody {
+    grid-template-columns: 1fr;
+  }
+
+  .posTableWrap {
+    max-height: 320px;
+  }
+}
+
+@media (max-width: 640px) {
+  .posRow2,
+  .posChips,
+  .posActions {
+    grid-template-columns: 1fr;
+  }
+
+  .posFajaTotal {
+    font-size: 1.5rem;
+  }
+}
+
+/* ============================================================
+   FIX MAQUETACIÓN: Sidebar / Logo contenido dentro de la barra
+   ============================================================ */
+.appLayout {
+  grid-template-columns: 290px minmax(0, 1fr);
+}
+
+.sidebar {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+}
+
+.contenido {
+  min-width: 0;
+  overflow-x: hidden;
+}
+
+.logoHeaderContainer {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 12px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.navbarLogoBox {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+.navbarLogoImg {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  max-height: 84px;
+  height: auto;
+  object-fit: contain;
+}
+
+.navbarRolBadgeBox {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.navbarRolBadge {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #93c5fd;
+  background: rgba(37, 99, 235, 0.18);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  border-radius: 999px;
+  padding: 6px 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.menuTexto {
+  flex: 1;
+  text-align: left;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.badgeContador {
+  background: var(--tz-cyan-bright, #22d3ee);
+  color: var(--tz-blue-dark, #0f172a);
+  font-weight: 800;
+  font-size: 11px;
+  border-radius: 999px;
+  padding: 1px 8px;
+}
+
+.usuarioInfoFila {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.usuarioNombres {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.usuarioNombres strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 1100px) {
+  .sidebar {
+    overflow: visible;
+  }
+}
+
+/* ============================================================
+   Vistas operativas del Vendedor: Apertura / Cierre / Devoluciones
+   ============================================================ */
+:root {
+  --tz-blue-dark: #0f172a;
+  --tz-blue-main: #1e3a8a;
+  --tz-blue-accent: #2563eb;
+  --tz-cyan-bright: #38bdf8;
+  --tz-green-cash: #16a34a;
+}
+
+.tzView {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.tzHero {
+  background: linear-gradient(135deg, var(--tz-blue-dark), var(--tz-blue-main));
+  color: #fff;
+  border-radius: 18px;
+  padding: 22px 26px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  box-shadow: var(--shadow);
+}
+
+.tzHero svg {
+  color: var(--tz-cyan-bright);
+  flex-shrink: 0;
+}
+
+.tzHero h2 {
+  margin: 2px 0 4px;
+  font-size: 1.5rem;
+}
+
+.tzHero p {
+  margin: 0;
+  color: #cbd5e1;
+  font-size: 0.9rem;
+}
+
+.tzHeroTag {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--tz-cyan-bright);
+}
+
+.tzCard {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 22px;
+  box-shadow: var(--shadow);
+}
+
+.tzCardDark {
+  background: linear-gradient(160deg, var(--tz-blue-dark), var(--tz-blue-main));
+  color: #fff;
+  border-radius: 18px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tzCardTitle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 16px;
+  font-size: 1.05rem;
+}
+
+.tzGrid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px;
+  align-items: start;
+}
+
+.tzField {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.tzField > label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: #94a3b8;
+}
+
+.tzCard .tzField > label {
+  color: #475569;
+}
+
+.tzField input,
+.tzField select,
+.tzField textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font-weight: 600;
+  outline: none;
+}
+
+.tzField input::placeholder,
+.tzField textarea::placeholder {
+  color: #94a3b8;
+}
+
+.tzField input:focus,
+.tzField select:focus,
+.tzField textarea:focus {
+  border-color: var(--tz-cyan-bright);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+}
+
+.tzField select option {
+  color: var(--tz-blue-dark);
+}
+
+.tzCard .tzField input,
+.tzCard .tzField select,
+.tzCard .tzField textarea {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: var(--tz-blue-dark);
+}
+
+.tzReadonly {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.tzReadonly svg {
+  color: var(--tz-cyan-bright);
+}
+
+.tzMoney {
+  position: relative;
+}
+
+.tzMoney span {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-weight: 800;
+  color: var(--tz-cyan-bright);
+  pointer-events: none;
+}
+
+.tzMoney input {
+  padding-left: 36px;
+}
+
+.tzMoneyLight span {
+  color: var(--tz-blue-main);
+}
+
+.tzBtn {
+  border: none;
+  border-radius: 12px;
+  padding: 14px 20px;
+  font-weight: 900;
+  letter-spacing: 0.5px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.tzBtnPrimary {
+  background: var(--tz-blue-accent);
+  color: #fff;
+}
+
+.tzBtnPrimary:hover {
+  background: #1d4ed8;
+}
+
+.tzBtnGreen {
+  background: var(--tz-green-cash);
+  color: #fff;
+  box-shadow: 0 10px 22px rgba(22, 163, 74, 0.35);
+}
+
+.tzBtnGreen:hover {
+  background: #15803d;
+}
+
+.tzBtnGhost {
+  background: rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tzBtnGhost:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.tzBtnFull {
+  width: 100%;
+}
+
+.tzBtnRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.tzFormCentrada {
+  max-width: 560px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.tzAviso {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.tzStat {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 8px;
+}
+
+.tzCard .tzStat {
+  background: #f8fafc;
+  border-color: var(--line);
+}
+
+.tzStatTotal {
+  background: rgba(56, 189, 248, 0.12) !important;
+  border-color: rgba(56, 189, 248, 0.4) !important;
+}
+
+.tzDiferencia {
+  border-radius: 14px;
+  padding: 16px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: 900;
+  color: #fff;
+}
+
+.tzDiferencia strong {
+  font-size: 1.7rem;
+}
+
+.tzDifOk {
+  background: var(--tz-green-cash);
+}
+
+.tzDifBad {
+  background: var(--danger);
+}
+
+.tzError {
+  color: var(--danger);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.tzEmpty {
+  padding: 34px;
+  text-align: center;
+  color: #64748b;
+  font-weight: 600;
+}
+
+.tzSearchBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 10px 14px;
+  box-shadow: var(--shadow);
+}
+
+.tzSearchBar svg {
+  color: var(--tz-blue-main);
+  flex-shrink: 0;
+}
+
+.tzSearchBar input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--tz-blue-dark);
+}
+
+.tzVentaHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.tzVentaHead h3 {
+  margin: 4px 0;
+  font-size: 1.3rem;
+}
+
+.tzVentaHead p {
+  margin: 0;
+  color: #64748b;
+}
+
+.tzVentaHeadTotal {
+  text-align: right;
+}
+
+.tzVentaHeadTotal span {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: #64748b;
+  font-weight: 800;
+}
+
+.tzVentaHeadTotal strong {
+  font-size: 1.7rem;
+  color: var(--tz-blue-main);
+}
+
+.tzTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.tzTable th {
+  background: var(--tz-blue-main);
+  color: #fff;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  letter-spacing: 0.7px;
+  padding: 11px 12px;
+  text-align: left;
+}
+
+.tzTable td {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tzTable tbody tr:hover {
+  background: #f1f5f9;
+}
+
+.tzFilaActiva {
+  background: #eff6ff;
+}
+
+.tzCheck {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--tz-blue-accent);
+}
+
+.tzCantidad {
+  width: 70px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+}
+
+.tzSelectInline {
+  padding: 7px 8px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  background: #fff;
+}
+
+.tzDevolucionFooter {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  background: var(--tz-blue-dark);
+  color: #fff;
+  border-radius: 16px;
+  padding: 18px 22px;
+}
+
+.tzDevolucionTotal span {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: #cbd5e1;
+  font-weight: 800;
+}
+
+.tzDevolucionTotal strong {
+  font-size: 1.8rem;
+  color: var(--tz-cyan-bright);
+}
+
+.tzReporteZ {
+  background: #fff;
+  border: 2px dashed var(--tz-blue-main);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-width: 720px;
+}
+
+.tzReporteZHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 2px solid var(--tz-blue-dark);
+  padding-bottom: 10px;
+  margin-bottom: 6px;
+}
+
+.tzReporteZHead strong {
+  font-size: 1.1rem;
+  letter-spacing: 1px;
+  color: var(--tz-blue-dark);
+}
+
+.tzReporteZHead span {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+.tzNotaHint {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #64748b;
+  font-size: 0.82rem;
+  margin: 4px 0 0;
+}
+
+@media (max-width: 1100px) {
+  .tzGrid2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+.tzSugerencias {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 10px;
+}
+
+.tzSugerencia {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: #f8fafc;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.tzSugerencia:hover {
+  border-color: var(--tz-blue-accent);
+  background: #eff6ff;
+  transform: translateY(-1px);
+}
+
+.tzSugerencia strong {
+  color: var(--tz-blue-main);
+  font-size: 0.95rem;
+}
+
+.tzSugerencia span {
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+/* ============================================================
+   Sidebar por categorías (Vendedor / Administrador)
+   ============================================================ */
+.menu {
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148, 163, 184, 0.4) transparent;
+  padding-right: 2px;
+}
+
+.menu::-webkit-scrollbar {
+  width: 6px;
+}
+
+.menu::-webkit-scrollbar-thumb {
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 999px;
+}
+
+.menuGrupo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.menuGrupo + .menuGrupo {
+  margin-top: 14px;
+}
+
+.menuGrupoTitulo {
+  display: block;
+  padding: 4px 14px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.sidebar .menu .menuBoton.activo {
+  background: linear-gradient(135deg, var(--tz-blue-accent, #2563eb), var(--tz-blue-main, #1e3a8a));
+  color: #ffffff;
+  font-weight: 700;
+  box-shadow: 0 10px 22px rgba(37, 99, 235, 0.45);
+  border-left: 3px solid var(--tz-cyan-bright, #38bdf8);
+}
+
+.sidebar .menu .menuBoton.activo svg {
+  color: var(--tz-cyan-bright, #38bdf8);
+}
+
+.tzBtnMini {
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  border-radius: 9px;
+}
+
+.tzFilaAlerta {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.tzPill {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.tzPillOk {
+  background: rgba(22, 163, 74, 0.15);
+  color: #16a34a;
+}
+
+.tzPillBad {
+  background: rgba(220, 38, 38, 0.15);
+  color: #dc2626;
+}
+
+@media print {
+  .tzHero,
+  .tzSearchBar,
+  .tzSugerencias,
+  .tzBtn,
+  .tzBtnRow {
+    display: none !important;
+  }
+}
+
+/* ============================================================
+   RESPONSIVE OVERHAUL: layout fluido (desktop -> movil)
+   Mapeo: .app-layout -> .appLayout | .main-content -> .contenido
+          .posMainGrid -> .posBody
+   ============================================================ */
+html,
+body {
+  overflow-x: hidden;
+}
+
+/* ---- Layout raiz: flex fluido ---- */
+.appLayout {
+  display: flex;
+  align-items: stretch;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.sidebar {
+  flex: 0 0 280px;
+  width: 280px;
+  max-width: 280px;
+}
+
+.contenido {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.mobileTopbar,
+.sidebarOverlay {
+  display: none;
+}
+
+/* ---- Paneles/tablas con scroll interno ---- */
+.tablaCard,
+.posTableWrap,
+.resumenItems,
+.tzTableScroll {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+/* ---- Tarjetas KPI y formularios auto-ajustables ---- */
+.dashboardGrid,
+.resumenHistorial,
+.tzGrid2,
+.adminGridDos {
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+/* ---- POS fluido ---- */
+.posShell {
+  height: auto;
+  min-height: 0;
+}
+
+.posBody {
+  grid-template-columns: minmax(0, 1fr) 360px;
+}
+
+.posTableWrap {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.posRight {
+  max-height: 60vh;
+}
+
+/* 768-1199px: POS 2 columnas ajustadas | <768px: POS 1 columna */
+@media (min-width: 768px) and (max-width: 1199px) {
+  .posBody {
+    grid-template-columns: minmax(0, 1fr) minmax(280px, 340px);
+  }
+}
+
+@media (max-width: 767px) {
+  .posBody {
+    grid-template-columns: 1fr;
+  }
+
+  .posRight {
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .posTableWrap {
+    max-height: 45vh;
+  }
+}
+
+@media (max-width: 640px) {
+  .posRow2,
+  .posChips,
+  .posActions {
+    grid-template-columns: 1fr;
+  }
+
+  .posFajaTotal {
+    font-size: 1.5rem;
+  }
+}
+
+/* ---- Sidebar colapsable tipo hamburguesa (< 992px) ---- */
+@media (max-width: 992px) {
+  .appLayout {
+    flex-direction: column;
+  }
+
+  .mobileTopbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    padding: 12px 16px;
+    background: linear-gradient(90deg, var(--tz-blue-dark, #0f172a), var(--tz-blue-main, #1e3a8a));
+    color: #fff;
+    box-shadow: 0 8px 22px rgba(15, 23, 42, 0.25);
+  }
+
+  .mobileMenuBoton {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+  }
+
+  .mobileLogo {
+    font-weight: 900;
+    letter-spacing: 0.5px;
+    font-size: 1.05rem;
+  }
+
+  .mobileLogo span {
+    color: var(--tz-cyan-bright, #38bdf8);
+  }
+
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 80;
+    height: 100vh;
+    width: min(280px, 82vw);
+    max-width: min(280px, 82vw);
+    transform: translateX(-105%);
+    transition: transform 0.25s ease;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  .appLayout.menuAbierto .sidebar {
+    transform: translateX(0);
+  }
+
+  .sidebarOverlay {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(2px);
+  }
+
+  .contenido {
+    padding: 18px;
+    overflow-x: hidden;
+  }
+
+  .menu {
+    flex-direction: column;
+    overflow: visible;
+  }
+}
+
+@media (max-width: 480px) {
+  .contenido {
+    padding: 14px;
+  }
+
+  .tzHero,
+  .heroPanel {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  th,
+  td {
+    padding: 10px;
+  }
+}
+
+@media print {
+  .mobileTopbar,
+  .sidebarOverlay {
+    display: none !important;
   }
 }

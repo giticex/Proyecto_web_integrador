@@ -6,7 +6,7 @@ import { useApp } from '../context/AppContext';
 import { Search } from 'lucide-react';
 
 export default function Productos() {
-  const { agregarProducto } = useApp();
+  const { agregarProducto, esAdmin, esVendedor } = useApp();
   const [productos, setProductos] = useState([]);
   const [busqueda, setBusqueda] = useState('');
   const [categoria, setCategoria] = useState('Todas');
@@ -68,7 +68,12 @@ export default function Productos() {
       ) : (
         <div className="productosGrid">
           {filtrados.map((producto) => (
-            <ProductoCard key={producto.idProducto} producto={producto} onAgregar={agregarProducto} />
+            <ProductoCard
+              key={producto.idProducto}
+              producto={producto}
+              onAgregar={agregarProducto}
+              mostrarStockExacto={esAdmin || esVendedor}
+            />
           ))}
         </div>
       )}

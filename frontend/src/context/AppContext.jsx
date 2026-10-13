@@ -14,6 +14,7 @@ export function AppProvider({ children }) {
 
   const cliente = sesion?.rol === 'CLIENTE' ? sesion : null;
   const esAdmin = sesion?.rol === 'ADMIN';
+  const esVendedor = sesion?.rol === 'VENDEDOR';
 
   function guardarSesion(nuevaSesion) {
     setSesion(nuevaSesion);
@@ -81,6 +82,7 @@ export function AppProvider({ children }) {
         sesion,
         cliente,
         esAdmin,
+        esVendedor,
         carrito,
         total,
         guardarSesion,

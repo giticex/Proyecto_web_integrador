@@ -2,6 +2,7 @@ const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8080/api';
 
 async function request(endpoint, options = {}) {
   const config = {
+    credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
       ...(options.headers || {})
@@ -52,4 +53,9 @@ export const dashboardService = {
 export const catalogoService = {
   tiposDocumento: () => request('/catalogos/tipos-documento'),
   mediosPago: () => request('/catalogos/medios-pago')
+};
+
+export const vendedorService = {
+  listar: () => request('/vendedores'),
+  crear: (vendedor) => request('/vendedores', { method: 'POST', body: JSON.stringify(vendedor) })
 };
