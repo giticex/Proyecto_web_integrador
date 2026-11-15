@@ -3,6 +3,8 @@ package pe.edu.utp.techzone.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import pe.edu.utp.techzone.dto.DetalleVentaDTO;
 import pe.edu.utp.techzone.dto.ItemVentaRequest;
 import pe.edu.utp.techzone.dto.RegistrarVentaRequest;
@@ -95,7 +97,10 @@ public class VentaService {
 
     /** Genera el número de comprobante oficial con formato SERIE-CORRELATIVO (correlativo de 8 dígitos). */
     private String generarNumeroComprobante(String serie) {
-        long siguiente = ventaRepository.maxCorrelativoPorSerie(serie) + 1;
+        BigDecimal ultimo = ventaRepository.maxCorrelativoPorSerie(serie);
+
+        long siguiente = (ultimo == null ? 0L : ultimo.longValue()) + 1L;
+
         return serie + "-" + String.format("%08d", siguiente);
     }
 
@@ -131,10 +136,32 @@ public class VentaService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
+    public Page<VentaDTO> listarTodasPaginadas(Pageable pageable) {
+        return ventaRepository
+        .findAllByOrderByFechaEmisionDesc(pageable)
+        .map(this::toDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<VentaDTO> historialClientePaginado(
+        String idCliente,
+        Pageable pageable
+) {
+    return ventaRepository
+            .findByCliente_IdClienteOrderByFechaEmisionDesc(
+                    idCliente,
+                    pageable
+            )
+            .map(this::toDTO);
+}
+
+
     public VentaDTO toDTO(Venta venta) {
         List<DetalleVentaDTO> detalles = detalleVentaRepository.findByVentaIdVenta(venta.getIdVenta())
                 .stream()
                 .map(detalle -> DetalleVentaDTO.builder()
+                        .idDetalle(detalle.getIdDetalle())
                         .idProducto(detalle.getProducto().getIdProducto())
                         .producto(detalle.getProducto().getNombre())
                         .cantidad(detalle.getCantidad())

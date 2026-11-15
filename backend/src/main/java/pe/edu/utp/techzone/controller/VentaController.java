@@ -8,6 +8,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
+import org.springframework.http.ResponseEntity;
+
 import pe.edu.utp.techzone.dto.RegistrarVentaRequest;
 import pe.edu.utp.techzone.dto.VentaDTO;
 import pe.edu.utp.techzone.service.VentaService;
@@ -39,4 +45,38 @@ public class VentaController {
     public List<VentaDTO> historialCliente(@PathVariable String idCliente) {
         return ventaService.historialCliente(idCliente);
     }
+
+
+@GetMapping("/paginadas")
+public ResponseEntity<Page<VentaDTO>> listarPaginadas(
+        @PageableDefault(size = 20) Pageable pageable
+) {
+    Pageable paginacionSegura = PageRequest.of(
+            Math.max(0, pageable.getPageNumber()),
+            Math.max(1, Math.min(pageable.getPageSize(), 100))
+    );
+
+    return ResponseEntity.ok(
+            ventaService.listarTodasPaginadas(paginacionSegura)
+    );
+}
+
+@GetMapping("/cliente/{idCliente}/paginadas")
+public ResponseEntity<Page<VentaDTO>> historialClientePaginado(
+        @PathVariable String idCliente,
+        @PageableDefault(size = 20) Pageable pageable
+) {
+    Pageable paginacionSegura = PageRequest.of(
+            Math.max(0, pageable.getPageNumber()),
+            Math.max(1, Math.min(pageable.getPageSize(), 100))
+    );
+
+    return ResponseEntity.ok(
+            ventaService.historialClientePaginado(
+                    idCliente,
+                    paginacionSegura
+            )
+    );
+}
+
 }

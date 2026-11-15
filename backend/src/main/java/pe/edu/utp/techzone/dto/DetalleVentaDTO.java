@@ -12,6 +12,8 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class DetalleVentaDTO {
+
+    private Integer idDetalle;
     private Integer idProducto;
     private String producto;
     private Integer cantidad;

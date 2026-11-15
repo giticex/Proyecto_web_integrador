@@ -26,15 +26,16 @@ public class ProductoService {
         return toDTO(obtenerEntidad(id));
     }
 
+
     @Transactional
     public ProductoDTO guardar(ProductoDTO dto) {
         Producto producto = Producto.builder()
-                .idProducto(dto.getIdProducto())
-                .nombre(dto.getNombre())
-                .stock(dto.getStock())
-                .precio(dto.getPrecio())
-                .categoria(dto.getCategoria())
-                .build();
+            .nombre(dto.getNombre())
+            .stock(dto.getStock())
+            .precio(dto.getPrecio())
+            .categoria(dto.getCategoria())
+            .build();
+
         return toDTO(productoRepository.save(producto));
     }
 
@@ -53,13 +54,23 @@ public class ProductoService {
         Producto producto = obtenerEntidad(id);
         productoRepository.delete(producto);
     }
-
     @Transactional
     public void descontarStock(Producto producto, Integer cantidad) {
-        if (producto.getStock() < cantidad) {
-            throw new BusinessException("Stock insuficiente para " + producto.getNombre());
+        if (cantidad == null || cantidad <= 0) {
+            throw new BusinessException(
+                "La cantidad a descontar debe ser mayor que cero."
+           );
         }
+
+        if (producto.getStock() == null || producto.getStock() < cantidad) {
+            throw new BusinessException(
+                "Stock insuficiente para " + producto.getNombre()
+            );
+        }
+
         producto.setStock(producto.getStock() - cantidad);
+
+        // Hibernate aplicará el control optimista mediante @Version.
         productoRepository.save(producto);
     }
 

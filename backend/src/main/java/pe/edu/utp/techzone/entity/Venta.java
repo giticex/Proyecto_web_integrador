@@ -35,6 +35,12 @@ public class Venta {
     @JoinColumn(name = "id_persona", referencedColumnName = "id_persona", nullable = false)
     private Persona persona;
 
+    // Caja asociada a la venta.
+    // Puede ser null cuando la compra no proviene del POS.
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_caja")
+    private Caja caja;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_tipo_documento", referencedColumnName = "id_documento", nullable = false)
     private TipoDocumento tipoDocumento;
