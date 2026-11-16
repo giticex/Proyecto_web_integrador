@@ -10,15 +10,25 @@ import {
   Smartphone
 } from 'lucide-react';
 import { clienteService, productoService, ventaService } from '../../services/api';
-
+import { cajaService } from '../../services/cajaService';
 const soles = (valor) => `S/ ${Number(valor || 0).toFixed(2)}`;
+
 
 const METODOS_PAGO = [
   { id: 'MP001', nombre: 'Efectivo', icono: Banknote },
-  { id: 'MP003', nombre: 'Tarjeta', icono: CreditCard },
+  { id: 'MP002', nombre: 'Tarjeta de crédito', icono: CreditCard },
+  { id: 'MP003', nombre: 'Tarjeta de débito', icono: CreditCard },
   { id: 'MP004', nombre: 'Yape', icono: Smartphone },
-  { id: 'MP005', nombre: 'Plin', icono: Smartphone }
+  { id: 'MP005', nombre: 'Plin', icono: Smartphone },
+  { id: 'MP006', nombre: 'Transferencia', icono: Smartphone },
+  { id: 'MP008', nombre: 'Billetera digital', icono: Smartphone },
+  { id: 'MP009', nombre: 'Visa', icono: CreditCard },
+  { id: 'MP010', nombre: 'Mastercard', icono: CreditCard },
+  { id: 'MP011', nombre: 'American Express', icono: CreditCard },
+  { id: 'MP012', nombre: 'Depósito', icono: Banknote },
+  { id: 'MP015', nombre: 'PayPal', icono: Smartphone }
 ];
+
 
 export default function PuntoVenta({ setVista, setVentaGenerada }) {
   const [productos, setProductos] = useState([]);
@@ -35,9 +45,13 @@ export default function PuntoVenta({ setVista, setVentaGenerada }) {
   const [mensaje, setMensaje] = useState('');
   const [cargando, setCargando] = useState(false);
   const [cargandoDatos, setCargandoDatos] = useState(true);
+  const [cajaActual, setCajaActual] = useState(null);
+const [cargandoCaja, setCargandoCaja] = useState(true);
+const [errorCaja, setErrorCaja] = useState('');
 
   const searchRef = useRef(null);
   const cobrarRef = useRef(null);
+  const procesandoVentaRef = useRef(false);
 
   useEffect(() => {
     (async () => {
@@ -60,6 +74,52 @@ export default function PuntoVenta({ setVista, setVentaGenerada }) {
   }, []);
 
   const enfocarBuscador = () => requestAnimationFrame(() => searchRef.current?.focus());
+
+
+useEffect(() => {
+
+  let activo = true;
+
+  async function cargarCajaActual() {
+
+    try {
+
+      const data = await cajaService.actual();
+
+      if (activo) {
+        setCajaActual(data);
+        setErrorCaja('');
+      }
+
+    } catch (error) {
+
+      if (!activo) return;
+
+      if (error.status === 404) {
+        setCajaActual(null);
+        setErrorCaja('');
+      } else {
+        setErrorCaja(
+          error.message || 'No se pudo consultar la caja actual.'
+        );
+      }
+
+    } finally {
+
+      if (activo) {
+        setCargandoCaja(false);
+      }
+
+    }
+  }
+
+  cargarCajaActual();
+
+  return () => {
+    activo = false;
+  };
+
+}, []);
 
   useEffect(() => {
     enfocarBuscador();
@@ -203,7 +263,17 @@ export default function PuntoVenta({ setVista, setVentaGenerada }) {
   }
 
   async function cobrar() {
+
+    if (procesandoVentaRef.current) return;
+
     setMensaje('');
+
+    if (!cajaActual?.idCaja) {
+  setMensaje(
+    errorCaja || 'Debes abrir una caja antes de realizar ventas.'
+  );
+  return;
+}
 
     if (!idCliente) {
       setMensaje('Selecciona un cliente para la venta.');
@@ -239,23 +309,48 @@ export default function PuntoVenta({ setVista, setVentaGenerada }) {
       items: carrito.map((item) => ({ idProducto: item.idProducto, cantidad: item.cantidad }))
     };
 
-    setCargando(true);
-    try {
-      const venta = await ventaService.registrar(request);
+    procesandoVentaRef.current = true;
+setCargando(true);
+
+try {
+      const venta = await ventaService.registrarPOS(request);
       setCarrito([]);
       setVentaGenerada(venta);
       setVista('comprobante');
     } catch (error) {
       setMensaje(error.message);
     } finally {
-      setCargando(false);
-    }
+    procesandoVentaRef.current = false;
+    setCargando(false);
+}
   }
   cobrarRef.current = cobrar;
 
-  if (cargandoDatos) {
+  if (cargandoDatos || cargandoCaja) {
     return <section className="panelVacio">Cargando terminal de venta...</section>;
   }
+  if (!cajaActual?.idCaja) {
+  return (
+    <section className="panelVacio">
+
+      <h2>Punto de Venta no disponible</h2>
+
+      <p>
+        {errorCaja ||
+          'No existe una caja abierta. Primero debes registrar la apertura.'}
+      </p>
+
+      <button
+        type="button"
+        className="tzBtn tzBtnPrimary"
+        onClick={() => setVista('apertura')}
+      >
+        Ir a Apertura de Caja
+      </button>
+
+    </section>
+  );
+}
 
   return (
     <div className="posShell">
@@ -263,7 +358,7 @@ export default function PuntoVenta({ setVista, setVentaGenerada }) {
         <div className="posBrand">
           <ShoppingBag size={26} />
           <strong>TechZone</strong>
-          <span>| CAJA #01</span>
+          <span>| CAJA #{cajaActual.idCaja}</span>
         </div>
         <form className="posSearch" onSubmit={escanear}>
           <Barcode size={24} />
@@ -447,10 +542,20 @@ export default function PuntoVenta({ setVista, setVentaGenerada }) {
           </div>
 
           <div className="posActions">
-            <button type="button" className="posBtnCancelar" onClick={volverAlInicio}>
+            <button
+    type="button"
+    className="posBtnCancelar"
+    onClick={volverAlInicio}
+    disabled={cargando}
+>
               CANCELAR
             </button>
-            <button type="button" className="posBtnCobrar" disabled={cargando} onClick={cobrar}>
+            <button
+    type="button"
+    className="posBtnCobrar"
+    disabled={cargando || !cajaActual?.idCaja}
+    onClick={cobrar}
+>
               {cargando ? 'Cobrando...' : 'COBRAR [F12]'}
             </button>
           </div>

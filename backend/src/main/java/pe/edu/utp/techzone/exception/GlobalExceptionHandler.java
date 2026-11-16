@@ -6,12 +6,47 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import jakarta.persistence.OptimisticLockException;
+import org.springframework.dao.OptimisticLockingFailureException;
+
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import jakarta.persistence.LockTimeoutException;
+import jakarta.persistence.PessimisticLockException;
+import org.springframework.dao.PessimisticLockingFailureException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ExceptionHandler({
+        OptimisticLockException.class,
+        OptimisticLockingFailureException.class
+    })
+    public ResponseEntity<Map<String, Object>> conflictoInventario(
+        RuntimeException ex
+    ) {
+        return response(
+            HttpStatus.CONFLICT,
+            "El producto fue modificado por otra operación. "
+                    + "Actualiza el inventario e intenta nuevamente."
+        );
+    }
+
+    @ExceptionHandler({
+    PessimisticLockException.class,
+    LockTimeoutException.class,
+    PessimisticLockingFailureException.class
+})
+public ResponseEntity<Map<String, Object>> conflictoBloqueo(
+        RuntimeException ex
+) {
+    return response(
+        HttpStatus.CONFLICT,
+        "El recurso está siendo utilizado por otra operación. "
+        + "Intenta nuevamente."
+    );
+}
 
     @ExceptionHandler(NotFoundException.class)
     public ResponseEntity<Map<String, Object>> notFound(NotFoundException ex) {

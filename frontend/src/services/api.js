@@ -16,8 +16,13 @@ async function request(endpoint, options = {}) {
 
   if (!response.ok) {
     const mensaje = data?.mensaje || data?.message || 'Ocurrió un error en la petición';
-    throw new Error(mensaje);
-  }
+
+    const error = new Error(mensaje);
+    error.status = response.status;
+    error.data = data;
+
+    throw error;
+}
 
   return data;
 }
@@ -41,9 +46,23 @@ export const clienteService = {
 
 export const ventaService = {
   listar: () => request('/ventas'),
-  registrar: (venta) => request('/ventas', { method: 'POST', body: JSON.stringify(venta) }),
+
+  registrar: (venta) =>
+    request('/ventas', {
+      method: 'POST',
+      body: JSON.stringify(venta)
+    }),
+
+  registrarPOS: (venta) =>
+    request('/ventas/pos', {
+      method: 'POST',
+      body: JSON.stringify(venta)
+    }),
+
   buscar: (idVenta) => request(`/ventas/${idVenta}`),
-  historialCliente: (idCliente) => request(`/ventas/cliente/${idCliente}`)
+
+  historialCliente: (idCliente) =>
+    request(`/ventas/cliente/${idCliente}`)
 };
 
 export const dashboardService = {
@@ -59,3 +78,5 @@ export const vendedorService = {
   listar: () => request('/vendedores'),
   crear: (vendedor) => request('/vendedores', { method: 'POST', body: JSON.stringify(vendedor) })
 };
+
+export { request as apiRequest };

@@ -6,7 +6,6 @@
 --  Modelo de venta:
 --    venta.id_cliente -> COMPRADOR   (tabla cliente)
 --    venta.id_persona -> VENDEDOR    (tabla persona, usuario que proceso la venta)
--- ============================================================================
 
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
@@ -19,15 +18,22 @@ CREATE DATABASE IF NOT EXISTS proyecto
 USE proyecto;
 
 -- 2. Limpieza previa (MySQL no admite "CASCADE" en DROP TABLE ni multiples tablas)
-DROP VIEW  IF EXISTS historial_compras;
+
+DROP VIEW IF EXISTS historial_compras;
+
+DROP TABLE IF EXISTS detalle_devolucion;
+DROP TABLE IF EXISTS devolucion;
 DROP TABLE IF EXISTS detalle_venta;
 DROP TABLE IF EXISTS venta;
+DROP TABLE IF EXISTS caja;
 DROP TABLE IF EXISTS usuario;
 DROP TABLE IF EXISTS persona;
 DROP TABLE IF EXISTS cliente;
 DROP TABLE IF EXISTS producto;
 DROP TABLE IF EXISTS medio_pago;
 DROP TABLE IF EXISTS tipo_documento;
+DROP TABLE IF EXISTS parametro;
+
 
 -- ============================================================================
 --  ESTRUCTURA
@@ -69,11 +75,58 @@ CREATE TABLE usuario (
     id_usuario INT          NOT NULL AUTO_INCREMENT,
     usuario    VARCHAR(50)  NOT NULL,
     contrasena VARCHAR(255) NOT NULL,
+    rol        VARCHAR(20)  NOT NULL DEFAULT 'CLIENTE',
     id_persona VARCHAR(25)  NOT NULL,
     PRIMARY KEY (id_usuario),
     KEY idx_usuario_id_persona (id_persona),
     CONSTRAINT fk_usuario_persona FOREIGN KEY (id_persona)
         REFERENCES persona (id_persona)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- CAJAS: aperturas, cierres y arqueos por vendedor
+CREATE TABLE caja (
+    id_caja BIGINT NOT NULL AUTO_INCREMENT,
+    id_usuario INT NOT NULL,
+
+    fecha_apertura DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    fecha_cierre DATETIME NULL,
+
+    fondo_inicial DECIMAL(12,2) NOT NULL,
+
+    -- Importes esperados al cierre.
+    -- El efectivo esperado incluye el fondo inicial.
+    efectivo_esperado DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    tarjeta_esperada DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    transferencia_esperada DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+    otros_esperados DECIMAL(12,2) NOT NULL DEFAULT 0.00,
+
+    -- Importes contados físicamente
+    efectivo_contado DECIMAL(12,2),
+    tarjeta_contada DECIMAL(12,2),
+    transferencia_contada DECIMAL(12,2),
+    otros_contados DECIMAL(12,2),
+
+    -- Diferencias entre sistema y conteo físico
+    diferencia_efectivo DECIMAL(12,2),
+    diferencia_tarjeta DECIMAL(12,2),
+    diferencia_transferencia DECIMAL(12,2),
+    diferencia_otros DECIMAL(12,2),
+
+    observaciones_apertura VARCHAR(500),
+    observaciones_cierre VARCHAR(500),
+
+    estado VARCHAR(15) NOT NULL DEFAULT 'ABIERTA',
+
+    PRIMARY KEY (id_caja),
+
+    KEY idx_caja_usuario (id_usuario),
+    KEY idx_caja_estado (estado),
+    KEY idx_caja_fecha (fecha_apertura),
+
+    CONSTRAINT fk_caja_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id_usuario)
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- El COMPRADOR. Antes de esta version la tabla no tenia ninguna relacion:
@@ -90,11 +143,12 @@ CREATE TABLE cliente (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 CREATE TABLE producto (
-    id_producto INT            NOT NULL,
-    nombre      VARCHAR(100)   NOT NULL,
-    stock       INT            NOT NULL,
-    precio      DECIMAL(10, 2) NOT NULL,
-    categoria   VARCHAR(80)    NOT NULL,
+    id_producto INT NOT NULL AUTO_INCREMENT,
+    nombre VARCHAR(100) NOT NULL,
+    stock INT NOT NULL,
+    precio DECIMAL(10, 2) NOT NULL,
+    categoria VARCHAR(80) NOT NULL,
+    version BIGINT NOT NULL DEFAULT 0,
     PRIMARY KEY (id_producto)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
@@ -103,13 +157,16 @@ CREATE TABLE venta (
     id_venta          VARCHAR(36) NOT NULL,
     id_cliente        VARCHAR(20) NOT NULL,
     id_persona        VARCHAR(25) NOT NULL,
+    id_caja BIGINT NULL,
     id_tipo_documento VARCHAR(25) NOT NULL,
     numero_documento  VARCHAR(36) NOT NULL,
+    numero_documento_cliente VARCHAR(15),
     id_medio_pago     VARCHAR(10) NOT NULL,
     fecha_emision     TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id_venta),
     KEY idx_venta_id_cliente (id_cliente),
     KEY idx_venta_id_persona (id_persona),
+    KEY idx_venta_id_caja (id_caja),
     KEY idx_venta_id_tipo_documento (id_tipo_documento),
     KEY idx_venta_id_medio_pago (id_medio_pago),
     KEY idx_venta_fecha_emision (fecha_emision),
@@ -121,6 +178,57 @@ CREATE TABLE venta (
         REFERENCES tipo_documento (id_documento),
     CONSTRAINT fk_venta_medio_pago FOREIGN KEY (id_medio_pago)
         REFERENCES medio_pago (id_medio_pago)
+    CONSTRAINT fk_venta_caja
+        FOREIGN KEY (id_caja)
+        REFERENCES caja(id_caja),
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- DEVOLUCIONES Y NOTAS DE CREDITO
+CREATE TABLE devolucion (
+    id_devolucion BIGINT NOT NULL AUTO_INCREMENT,
+    id_venta VARCHAR(36) NOT NULL,
+    id_usuario INT NOT NULL,
+    id_caja BIGINT NULL,
+    id_medio_pago_reembolso VARCHAR(10) NOT NULL,
+
+    numero_nota_credito VARCHAR(40) NOT NULL,
+    fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    motivo VARCHAR(255) NOT NULL,
+    monto_reembolsado DECIMAL(12,2) NOT NULL,
+
+    estado VARCHAR(20) NOT NULL DEFAULT 'REGISTRADA',
+    observaciones VARCHAR(500),
+
+    PRIMARY KEY (id_devolucion),
+
+    CONSTRAINT uk_devolucion_nota
+        UNIQUE (numero_nota_credito),
+
+    KEY idx_devolucion_venta (id_venta),
+    KEY idx_devolucion_usuario (id_usuario),
+    KEY idx_devolucion_caja (id_caja),
+    KEY idx_devolucion_fecha (fecha_registro),
+
+    CONSTRAINT fk_devolucion_venta
+        FOREIGN KEY (id_venta)
+        REFERENCES venta(id_venta),
+
+    CONSTRAINT fk_devolucion_usuario
+        FOREIGN KEY (id_usuario)
+        REFERENCES usuario(id_usuario),
+
+    CONSTRAINT fk_devolucion_caja
+        FOREIGN KEY (id_caja)
+        REFERENCES caja(id_caja),
+
+    CONSTRAINT fk_devolucion_medio_pago_reembolso
+        FOREIGN KEY (id_medio_pago_reembolso)
+        REFERENCES medio_pago(id_medio_pago),
+
+    CONSTRAINT chk_devolucion_monto
+        CHECK (monto_reembolsado >= 0)
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- id_detalle: GENERATED BY DEFAULT AS IDENTITY (Postgres) -> AUTO_INCREMENT (MySQL)
@@ -138,6 +246,46 @@ CREATE TABLE detalle_venta (
         REFERENCES venta (id_venta),
     CONSTRAINT fk_detalle_producto FOREIGN KEY (id_producto)
         REFERENCES producto (id_producto)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+
+CREATE TABLE detalle_devolucion (
+    id_detalle_devolucion BIGINT NOT NULL AUTO_INCREMENT,
+
+    id_devolucion BIGINT NOT NULL,
+    id_detalle_venta INT NOT NULL,
+
+    cantidad INT NOT NULL,
+    precio_unitario DECIMAL(10,2) NOT NULL,
+    subtotal DECIMAL(12,2) NOT NULL,
+
+    motivo VARCHAR(255),
+
+    PRIMARY KEY (id_detalle_devolucion),
+
+    UNIQUE KEY uk_devolucion_detalle (
+        id_devolucion,
+        id_detalle_venta
+    ),
+
+    KEY idx_detalle_devolucion_venta (
+        id_detalle_venta
+    ),
+
+    CONSTRAINT fk_detalle_devolucion
+        FOREIGN KEY (id_devolucion)
+        REFERENCES devolucion(id_devolucion),
+
+    CONSTRAINT fk_detalle_venta_original
+        FOREIGN KEY (id_detalle_venta)
+        REFERENCES detalle_venta(id_detalle),
+
+    CONSTRAINT chk_devolucion_cantidad
+        CHECK (cantidad > 0),
+
+    CONSTRAINT chk_devolucion_subtotal
+        CHECK (subtotal >= 0)
+
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================================
@@ -188,23 +336,23 @@ INSERT INTO persona VALUES
 ('PER015', 'Fernando', 'Lozano', '1995-08-11', 'fernando@gmail.com', '987654335', 'fernandol'),
 ('PERADM', 'Administrador', 'General', '1995-01-01', 'admin@softplex.com', '999999999', 'admin');
 
-INSERT INTO usuario (usuario, contrasena, id_persona) VALUES
-('luisg', '123456', 'PER001'),
-('anat', '123456', 'PER002'),
-('carlosr', '123456', 'PER003'),
-('mariaf', '123456', 'PER004'),
-('pedroc', '123456', 'PER005'),
-('luciam', '123456', 'PER006'),
-('jorgep', '123456', 'PER007'),
-('rosav', '123456', 'PER008'),
-('miguels', '123456', 'PER009'),
-('dianaq', '123456', 'PER010'),
-('joser', '123456', 'PER011'),
-('elenac', '123456', 'PER012'),
-('rauln', '123456', 'PER013'),
-('sofiah', '123456', 'PER014'),
-('fernandol', '123456', 'PER015'),
-('admin', '123456', 'PERADM');
+INSERT INTO usuario (usuario, contrasena, rol, id_persona) VALUES
+('luisg', '123456', 'CLIENTE', 'PER001'),
+('anat', '123456', 'CLIENTE', 'PER002'),
+('carlosr', '123456', 'CLIENTE', 'PER003'),
+('mariaf', '123456', 'CLIENTE', 'PER004'),
+('pedroc', '123456', 'CLIENTE', 'PER005'),
+('luciam', '123456', 'CLIENTE', 'PER006'),
+('jorgep', '123456', 'CLIENTE', 'PER007'),
+('rosav', '123456', 'CLIENTE', 'PER008'),
+('miguels', '123456', 'CLIENTE', 'PER009'),
+('dianaq', '123456', 'CLIENTE', 'PER010'),
+('joser', '123456', 'CLIENTE', 'PER011'),
+('elenac', '123456', 'CLIENTE', 'PER012'),
+('rauln', '123456', 'CLIENTE', 'PER013'),
+('sofiah', '123456', 'CLIENTE', 'PER014'),
+('fernandol', '123456', 'CLIENTE', 'PER015'),
+('admin', '123456', 'ADMIN', 'PERADM');
 
 INSERT INTO cliente VALUES
 ('CLI001', 'Luis', 'García', '987654321', '123456', 'luis@gmail.com'),
@@ -223,7 +371,7 @@ INSERT INTO cliente VALUES
 ('CLI014', 'Sofía', 'Herrera', '987654334', '123456', 'sofia@gmail.com'),
 ('CLI015', 'Fernando', 'Lozano', '987654335', '123456', 'fernando@gmail.com');
 
-INSERT INTO producto VALUES
+INSERT INTO producto (id_producto, nombre, stock, precio, categoria) VALUES
 (1, 'Laptop Lenovo', 20, 2500.00, 'Laptops'),
 (2, 'Mouse Logitech', 50, 45.00, 'Periféricos'),
 (3, 'Teclado Mecánico', 35, 150.00, 'Periféricos'),
