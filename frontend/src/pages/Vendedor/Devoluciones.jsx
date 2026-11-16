@@ -59,6 +59,7 @@ export default function Devoluciones() {
   const [registrando, setRegistrando] = useState(false);
   const [nota, setNota] = useState(null);
 
+
   // =========================================================
   // 1. CARGAR VENTAS REALES
   // =========================================================
@@ -91,57 +92,6 @@ export default function Devoluciones() {
       }
     }
 
-
-useEffect(() => {
-
-  let activo = true;
-
-  async function cargarMediosPago() {
-
-    try {
-
-      const data = await catalogoService.mediosPago();
-
-      if (!activo) return;
-
-      const lista = Array.isArray(data) ? data : [];
-
-      setMediosPago(lista);
-
-      const efectivo = lista.find(
-        medio => medio.idMedioPago === 'MP001'
-      );
-
-      setMedioPagoReembolso(
-        efectivo?.idMedioPago || lista[0]?.idMedioPago || ''
-      );
-
-    } catch (error) {
-
-      if (activo) {
-        setMensaje(
-          `No se pudieron cargar los medios de pago: ${error.message}`
-        );
-      }
-
-    } finally {
-
-      if (activo) {
-        setCargandoMediosPago(false);
-      }
-
-    }
-  }
-
-  cargarMediosPago();
-
-  return () => {
-    activo = false;
-  };
-
-}, []);
-
-
     cargarVentas();
 
     return () => {
@@ -152,7 +102,62 @@ useEffect(() => {
 
 
   // =========================================================
-  // 2. BUSCAR COMPROBANTE
+  // 2. CARGAR MEDIOS DE PAGO DESDE MYSQL
+  // =========================================================
+
+  useEffect(() => {
+
+    let activo = true;
+
+    async function cargarMediosPago() {
+
+      try {
+
+        const data = await catalogoService.mediosPago();
+
+        if (!activo) return;
+
+        const lista = (Array.isArray(data) ? data : [])
+          .filter(medio =>
+            !MEDIOS_PAGO_BLOQUEADOS.has(medio.idMedioPago)
+          );
+
+        setMediosPago(lista);
+
+        const efectivo = lista.find(
+          medio => medio.idMedioPago === 'MP001'
+        );
+
+        setMedioPagoReembolso(
+          efectivo?.idMedioPago || lista[0]?.idMedioPago || ''
+        );
+
+      } catch (error) {
+
+        if (activo) {
+          setMensaje(
+            `No se pudieron cargar los medios de pago: ${error.message}`
+          );
+        }
+
+      } finally {
+
+        if (activo) {
+          setCargandoMediosPago(false);
+        }
+      }
+    }
+
+    cargarMediosPago();
+
+    return () => {
+      activo = false;
+    };
+
+  }, []);
+
+  // =========================================================
+  // 3. BUSCAR COMPROBANTE
   // =========================================================
 
   async function buscar(e) {
@@ -362,75 +367,81 @@ useEffect(() => {
   // 6. REGISTRAR DEVOLUCION EN MYSQL
   // =========================================================
 
-  async function generarNota() {
+async function generarNota() {
+  setMensaje('');
 
-    setMensaje('');
-
-    if (!ventaSel || errorHistorial || cargandoDevoluciones) {
-      setMensaje('No se pudo validar el historial de devoluciones.');
-      return;
-    }
-
-    const items = seleccion
-      .filter(item => item.checked)
-      .map(item => ({
-        idDetalleVenta: item.idDetalleVenta,
-        cantidad: item.cantidad,
-        motivo: item.motivo
-      }));
-
-    if (items.length === 0) {
-      setMensaje('Selecciona al menos un producto para devolver.');
-      return;
-    }
-
-    if (!motivoGeneral.trim()) {
-      setMensaje('Debes indicar el motivo general de la devolución.');
-      return;
-    }
-
-    setRegistrando(true);
-
-    if (!medioPagoReembolso) {
-    setMensaje('Selecciona el medio de pago del reembolso.');
+  if (!ventaSel || errorHistorial || cargandoDevoluciones) {
+    setMensaje('No se pudo validar el historial de devoluciones.');
     return;
-}
+  }
 
-if (cargandoMediosPago || mediosPago.length === 0) {
+  if (cargandoMediosPago || mediosPago.length === 0) {
     setMensaje('No se pudieron cargar los medios de pago.');
     return;
-}
-
-    try {
-
-      const resultado = await devolucionService.registrar({
-
-  idVenta: ventaSel.idVenta,
-
-  idMedioPagoReembolso: medioPagoReembolso,
-
-  motivo: motivoGeneral,
-
-  observaciones: observaciones.trim(),
-
-  items
-
-});
-
-      // La nota proviene del backend.
-      setNota(resultado);
-
-      setMensaje('');
-
-    } catch (error) {
-
-      setMensaje(error.message);
-
-    } finally {
-
-      setRegistrando(false);
-    }
   }
+
+  const medioValido = mediosPago.some(
+    medio => medio.idMedioPago === medioPagoReembolso
+  );
+
+  if (!medioPagoReembolso || !medioValido) {
+    setMensaje('Selecciona un medio de pago válido.');
+    return;
+  }
+
+  const items = seleccion
+    .filter(item => item.checked)
+    .map(item => ({
+      idDetalleVenta: item.idDetalleVenta,
+      cantidad: item.cantidad,
+      motivo: item.motivo
+    }));
+
+  if (items.length === 0) {
+    setMensaje('Selecciona al menos un producto para devolver.');
+    return;
+  }
+
+  if (!motivoGeneral.trim()) {
+    setMensaje('Debes indicar el motivo general de la devolución.');
+    return;
+  }
+
+  if (registrando) return;
+
+  setRegistrando(true);
+
+  try {
+
+    const resultado = await devolucionService.registrar({
+
+      idVenta: ventaSel.idVenta,
+
+      idMedioPagoReembolso: medioPagoReembolso,
+
+      motivo: motivoGeneral,
+
+      observaciones: observaciones.trim(),
+
+      items
+
+    });
+
+    setNota(resultado);
+    setMensaje('');
+
+  } catch (error) {
+
+    setMensaje(
+      error.message || 'No se pudo registrar la devolución.'
+    );
+
+  } finally {
+
+    setRegistrando(false);
+
+  }
+}
 
 
   // =========================================================
