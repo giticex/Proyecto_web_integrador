@@ -38,6 +38,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.Set;
+import java.util.Comparator;
 
 @Service
 @RequiredArgsConstructor
@@ -225,35 +226,49 @@ if (!"ABIERTA".equals(caja.getEstado())) {
                 .build();
 
         ventaRepository.save(venta);
+// =====================================================
+// REGISTRAR DETALLES Y DESCONTAR INVENTARIO
+// =====================================================
 
-        // Registrar detalles y descontar inventario.
-        for (ItemVentaRequest item : request.getItems()) {
+// Ordenar productos por ID para reducir deadlocks
+// cuando varias ventas procesan productos simultáneamente.
+List<ItemVentaRequest> itemsOrdenados =
+        request.getItems().stream()
+                .sorted(Comparator.comparing(
+                        ItemVentaRequest::getIdProducto
+                ))
+                .toList();
 
-            Producto producto = productoService.obtenerEntidad(
-                    item.getIdProducto()
-            );
+for (ItemVentaRequest item : itemsOrdenados) {
 
-            productoService.descontarStock(
-                    producto,
-                    item.getCantidad()
-            );
+    // Obtener producto con bloqueo pesimista.
+    Producto producto = productoService.obtenerEntidadConBloqueo(
+            item.getIdProducto()
+    );
 
-            BigDecimal precio = producto.getPrecio();
+    // Validar y descontar stock.
+    productoService.descontarStock(
+            producto,
+            item.getCantidad()
+    );
 
-            BigDecimal subtotal = precio.multiply(
-                    BigDecimal.valueOf(item.getCantidad())
-            );
+    BigDecimal precio = producto.getPrecio();
 
-            DetalleVenta detalle = DetalleVenta.builder()
-                    .venta(venta)
-                    .producto(producto)
-                    .cantidad(item.getCantidad())
-                    .precioUnitario(precio)
-                    .subtotal(subtotal)
-                    .build();
+    BigDecimal subtotal = precio.multiply(
+            BigDecimal.valueOf(item.getCantidad())
+    );
 
-            detalleVentaRepository.save(detalle);
-        }
+    DetalleVenta detalle = DetalleVenta.builder()
+            .venta(venta)
+            .producto(producto)
+            .cantidad(item.getCantidad())
+            .precioUnitario(precio)
+            .subtotal(subtotal)
+            .build();
+
+    detalleVentaRepository.save(detalle);
+}
+
 
         return buscar(idVenta);
     }

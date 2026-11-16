@@ -183,12 +183,26 @@ export default function CierreCaja({ setVista }) {
       + Number(reporte.otrosContados || 0)
     : 0;
 
-  const diferenciaTotal = reporte
-    ? Number(reporte.diferenciaEfectivo || 0)
-      + Number(reporte.diferenciaTarjeta || 0)
-      + Number(reporte.diferenciaTransferencia || 0)
-      + Number(reporte.diferenciaOtros || 0)
-    : 0;
+  const diferencias = reporte
+  ? [
+      Number(reporte.diferenciaEfectivo || 0),
+      Number(reporte.diferenciaTarjeta || 0),
+      Number(reporte.diferenciaTransferencia || 0),
+      Number(reporte.diferenciaOtros || 0)
+    ]
+  : [];
+
+const totalFaltante = diferencias.reduce(
+  (total, valor) => total + Math.max(0, -valor),
+  0
+);
+
+const totalSobrante = diferencias.reduce(
+  (total, valor) => total + Math.max(0, valor),
+  0
+);
+
+const descuadreTotal = totalFaltante + totalSobrante;
 
   if (cargando) {
     return (
@@ -309,13 +323,23 @@ export default function CierreCaja({ setVista }) {
           </div>
 
           <div className={`tzDiferencia ${
-            Math.abs(diferenciaTotal) < 0.01
-              ? 'tzDifOk'
-              : 'tzDifBad'
-          }`}>
-            <span>DIFERENCIA TOTAL</span>
-            <strong>{soles(diferenciaTotal)}</strong>
-          </div>
+  descuadreTotal < 0.01
+    ? 'tzDifOk'
+    : 'tzDifBad'
+}`}>
+  <span>DESCUADRE TOTAL</span>
+  <strong>{soles(descuadreTotal)}</strong>
+</div>
+
+<div className="tzStat">
+  <span>Faltantes acumulados</span>
+  <strong>{soles(totalFaltante)}</strong>
+</div>
+
+<div className="tzStat">
+  <span>Sobrantes acumulados</span>
+  <strong>{soles(totalSobrante)}</strong>
+</div>
 
           <div className="tzBtnRow">
 

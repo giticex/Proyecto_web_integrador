@@ -16,11 +16,30 @@ public interface DetalleDevolucionRepository
     );
 
     @Query("""
-        SELECT COALESCE(SUM(d.cantidad), 0)
-        FROM DetalleDevolucion d
-        WHERE d.detalleVenta.idDetalle = :idDetalleVenta
-        """)
-    long totalDevueltoPorDetalleVenta(
-            @Param("idDetalleVenta") Integer idDetalleVenta
-    );
+    SELECT COALESCE(SUM(d.cantidad), 0)
+    FROM DetalleDevolucion d
+    WHERE d.detalleVenta.idDetalle = :idDetalleVenta
+      AND d.devolucion.estado = 'REGISTRADA'
+    """)
+long totalDevueltoPorDetalleVenta(
+        @Param("idDetalleVenta") Integer idDetalleVenta
+);
+
+// =========================================================
+// RESUMEN DE CANTIDADES DEVUELTAS POR VENTA
+// =========================================================
+
+@Query("""
+    SELECT
+        d.detalleVenta.idDetalle,
+        COALESCE(SUM(d.cantidad), 0)
+    FROM DetalleDevolucion d
+    WHERE d.detalleVenta.venta.idVenta = :idVenta
+      AND d.devolucion.estado = 'REGISTRADA'
+    GROUP BY d.detalleVenta.idDetalle
+    """)
+List<Object[]> obtenerCantidadesDevueltasPorVenta(
+        @Param("idVenta") String idVenta
+);
+
 }

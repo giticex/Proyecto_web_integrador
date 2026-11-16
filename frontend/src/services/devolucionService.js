@@ -1,7 +1,12 @@
-
 import { apiRequest } from './api';
 
 export const devolucionService = {
+
+    // Consultar cantidades devueltas por detalle de venta.
+resumenPorVenta: (idVenta) =>
+  apiRequest(
+    `/devoluciones/venta/${encodeURIComponent(idVenta)}/resumen`
+  ),
 
   // Registrar devolución
   registrar: (datos) =>

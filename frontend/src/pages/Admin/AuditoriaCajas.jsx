@@ -13,12 +13,15 @@ import { cajaService } from '../../services/cajaService';
 const soles = (valor) =>
   `S/ ${Number(valor || 0).toFixed(2)}`;
 
-function obtenerDiferencia(caja) {
-  return (
-    Number(caja.diferenciaEfectivo || 0) +
-    Number(caja.diferenciaTarjeta || 0) +
-    Number(caja.diferenciaTransferencia || 0) +
-    Number(caja.diferenciaOtros || 0)
+function obtenerDescuadre(caja) {
+  return [
+    caja.diferenciaEfectivo,
+    caja.diferenciaTarjeta,
+    caja.diferenciaTransferencia,
+    caja.diferenciaOtros
+  ].reduce(
+    (total, valor) => total + Math.abs(Number(valor || 0)),
+    0
   );
 }
 
@@ -306,7 +309,7 @@ export default function AuditoriaCajas() {
                   <th>Fondo inicial</th>
                   <th>Esperado</th>
                   <th>Contado</th>
-                  <th>Diferencia</th>
+                  <th>Descuadre acumulado</th>
                   <th>Estado</th>
                 </tr>
               </thead>
@@ -315,12 +318,11 @@ export default function AuditoriaCajas() {
 
                 {cajas.map(caja => {
 
-                  const diferencia = obtenerDiferencia(caja);
-                  const esperado = obtenerEsperado(caja);
-                  const contado = obtenerContado(caja);
+                  const descuadre = obtenerDescuadre(caja);
+const esperado = obtenerEsperado(caja);
+const contado = obtenerContado(caja);
 
-                  const cuadrado =
-                    Math.abs(diferencia) < 0.01;
+const cuadrado = descuadre < 0.01;
 
                   const abierta =
                     caja.estado === 'ABIERTA';
@@ -378,7 +380,7 @@ export default function AuditoriaCajas() {
                                 : 'tzPill tzPillBad'
                             }
                           >
-                            {soles(diferencia)}
+                            {soles(descuadre)}
                           </span>
 
                         )}

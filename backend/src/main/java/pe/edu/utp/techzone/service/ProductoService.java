@@ -41,7 +41,7 @@ public class ProductoService {
 
     @Transactional
     public ProductoDTO actualizar(Integer id, ProductoDTO dto) {
-        Producto producto = obtenerEntidad(id);
+        Producto producto = obtenerEntidadConBloqueo(id);
         producto.setNombre(dto.getNombre());
         producto.setStock(dto.getStock());
         producto.setPrecio(dto.getPrecio());
@@ -50,10 +50,10 @@ public class ProductoService {
     }
 
     @Transactional
-    public void eliminar(Integer id) {
-        Producto producto = obtenerEntidad(id);
-        productoRepository.delete(producto);
-    }
+public void eliminar(Integer id) {
+    Producto producto = obtenerEntidadConBloqueo(id);
+    productoRepository.delete(producto);
+}
     @Transactional
     public void descontarStock(Producto producto, Integer cantidad) {
         if (cantidad == null || cantidad <= 0) {
@@ -79,6 +79,15 @@ public class ProductoService {
         return productoRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Producto no encontrado"));
     }
+    // Obtener producto con bloqueo para operaciones de inventario.
+@Transactional
+public Producto obtenerEntidadConBloqueo(Integer id) {
+
+    return productoRepository.buscarPorIdConBloqueo(id)
+            .orElseThrow(() ->
+                    new NotFoundException("Producto no encontrado")
+            );
+}
 
     public ProductoDTO toDTO(Producto producto) {
         return ProductoDTO.builder()

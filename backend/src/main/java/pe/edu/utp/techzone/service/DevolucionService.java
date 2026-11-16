@@ -436,6 +436,35 @@ if (totalNuevoReembolsado.compareTo(totalVenta) > 0) {
     }
 
 
+// =========================================================
+// RESUMEN DE CANTIDADES DEVUELTAS POR VENTA
+// =========================================================
+
+@Transactional(readOnly = true)
+public List<CantidadDevueltaDTO> resumenCantidadesDevueltas(
+        String idVenta,
+        String nombreUsuario
+) {
+
+    Usuario usuario = obtenerUsuario(nombreUsuario);
+    validarPermiso(usuario);
+
+    if (!ventaRepository.existsById(idVenta)) {
+        throw new NotFoundException(
+                "Venta original no encontrada."
+        );
+    }
+
+    return detalleDevolucionRepository
+            .obtenerCantidadesDevueltasPorVenta(idVenta)
+            .stream()
+            .map(fila -> new CantidadDevueltaDTO(
+                    ((Number) fila[0]).intValue(),
+                    ((Number) fila[1]).longValue()
+            ))
+            .toList();
+}
+
     // =========================================================
     // 5. VALIDACIONES
     // =========================================================

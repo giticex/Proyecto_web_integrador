@@ -230,28 +230,18 @@ export default function Devoluciones() {
       }
 
       // Consultar devoluciones anteriores de esta venta.
-      const historial = await devolucionService.porVenta(
-        venta.idVenta,
-        0,
-        100
-      );
+      // Consultar cantidades devueltas de todos los operadores,
+// sin exponer los detalles de sus notas de crédito.
+const resumen = await devolucionService.resumenPorVenta(
+  venta.idVenta
+);
 
-      const acumulados = new Map();
-
-      (historial.content || []).forEach(devolucion => {
-
-        (devolucion.detalles || []).forEach(detalle => {
-
-          const id = detalle.idDetalleVenta;
-
-          acumulados.set(
-            id,
-            (acumulados.get(id) || 0) + Number(detalle.cantidad || 0)
-          );
-
-        });
-
-      });
+const acumulados = new Map(
+  (Array.isArray(resumen) ? resumen : []).map(item => [
+    Number(item.idDetalleVenta),
+    Number(item.cantidadDevuelta || 0)
+  ])
+);
 
       const nuevaSeleccion = detalles.map(detalle => {
 

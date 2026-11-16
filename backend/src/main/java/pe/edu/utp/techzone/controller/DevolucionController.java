@@ -17,6 +17,8 @@ import org.springframework.web.server.ResponseStatusException;
 import pe.edu.utp.techzone.dto.DevolucionDTO;
 import pe.edu.utp.techzone.dto.RegistrarDevolucionRequest;
 import pe.edu.utp.techzone.service.DevolucionService;
+import pe.edu.utp.techzone.dto.CantidadDevueltaDTO;
+import java.util.List;
 
 import java.security.Principal;
 
@@ -114,6 +116,28 @@ public class DevolucionController {
                 )
         );
     }
+
+
+// =========================================================
+// 5. RESUMEN DE CANTIDADES DEVUELTAS
+// GET /api/devoluciones/venta/{idVenta}/resumen
+// =========================================================
+
+@GetMapping("/venta/{idVenta}/resumen")
+public ResponseEntity<List<CantidadDevueltaDTO>> resumenPorVenta(
+        @PathVariable String idVenta,
+        Principal principal
+) {
+
+    String usuario = obtenerUsuarioAutenticado(principal);
+
+    return ResponseEntity.ok(
+            devolucionService.resumenCantidadesDevueltas(
+                    idVenta,
+                    usuario
+            )
+    );
+}
 
 
     // =========================================================
