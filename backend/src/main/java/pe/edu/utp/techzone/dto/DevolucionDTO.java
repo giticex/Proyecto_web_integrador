@@ -29,6 +29,8 @@ public class DevolucionDTO {
 
     private Long idCaja;
 
+    private String medioPagoReembolso;
+
     private LocalDateTime fechaRegistro;
 
     private String motivo;

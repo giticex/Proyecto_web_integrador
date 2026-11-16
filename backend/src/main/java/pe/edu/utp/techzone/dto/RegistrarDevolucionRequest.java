@@ -16,6 +16,10 @@ public class RegistrarDevolucionRequest {
     @NotBlank(message = "El identificador de venta es obligatorio")
     private String idVenta;
 
+    @NotBlank(message = "El medio de pago del reembolso es obligatorio")
+    @Size(max = 10)
+    private String idMedioPagoReembolso;
+
     @NotBlank(message = "El motivo de devolución es obligatorio")
     @Size(max = 255)
     private String motivo;

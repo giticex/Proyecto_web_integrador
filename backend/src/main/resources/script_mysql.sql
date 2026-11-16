@@ -189,6 +189,7 @@ CREATE TABLE devolucion (
     id_venta VARCHAR(36) NOT NULL,
     id_usuario INT NOT NULL,
     id_caja BIGINT NULL,
+    id_medio_pago_reembolso VARCHAR(10) NOT NULL,
 
     numero_nota_credito VARCHAR(40) NOT NULL,
     fecha_registro DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -220,6 +221,10 @@ CREATE TABLE devolucion (
     CONSTRAINT fk_devolucion_caja
         FOREIGN KEY (id_caja)
         REFERENCES caja(id_caja),
+
+    CONSTRAINT fk_devolucion_medio_pago_reembolso
+        FOREIGN KEY (id_medio_pago_reembolso)
+        REFERENCES medio_pago(id_medio_pago),
 
     CONSTRAINT chk_devolucion_monto
         CHECK (monto_reembolsado >= 0)

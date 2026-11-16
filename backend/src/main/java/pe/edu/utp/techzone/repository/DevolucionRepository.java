@@ -3,6 +3,12 @@ package pe.edu.utp.techzone.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import java.util.List;
+import java.math.BigDecimal;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 import pe.edu.utp.techzone.entity.Devolucion;
 
@@ -28,4 +34,29 @@ public interface DevolucionRepository
         String usuario,
         Pageable pageable
     );
+
+    // REEMBOLSOS AGRUPADOS POR MEDIO DE PAGO Y CAJA
+   @Query("""
+    SELECT
+        d.medioPagoReembolso.idMedioPago,
+        COALESCE(SUM(d.montoReembolsado), 0)
+    FROM Devolucion d
+    WHERE d.caja.idCaja = :idCaja
+      AND d.estado = 'REGISTRADA'
+    GROUP BY d.medioPagoReembolso.idMedioPago
+    """)
+List<Object[]> obtenerTotalesReembolsadosPorMedioPagoDeCaja(
+        @Param("idCaja") Long idCaja
+);
+
+   // Obtener el importe acumulado de las devoluciones de una venta.
+@Query("""
+    SELECT COALESCE(SUM(d.montoReembolsado), 0)
+    FROM Devolucion d
+    WHERE d.venta.idVenta = :idVenta
+      AND d.estado = 'REGISTRADA'
+    """)
+BigDecimal totalReembolsadoPorVenta(
+        @Param("idVenta") String idVenta
+);
 }

@@ -164,18 +164,18 @@ public interface VentaRepository extends JpaRepository<Venta, String> {
     // =========================================================
 
     @Query(value = """
-        SELECT
-            mp.descripcion,
-            COALESCE(SUM(dv.subtotal), 0)
-        FROM venta v
-        INNER JOIN medio_pago mp
-            ON v.id_medio_pago = mp.id_medio_pago
-        INNER JOIN detalle_venta dv
-            ON v.id_venta = dv.id_venta
-        WHERE v.id_caja = :idCaja
-        GROUP BY mp.descripcion
-        """, nativeQuery = true)
-    List<Object[]> obtenerTotalesPorMedioPagoDeCaja(
-            @Param("idCaja") Long idCaja
-    );
+    SELECT
+        mp.id_medio_pago,
+        COALESCE(SUM(dv.subtotal), 0)
+    FROM venta v
+    INNER JOIN medio_pago mp
+        ON v.id_medio_pago = mp.id_medio_pago
+    INNER JOIN detalle_venta dv
+        ON v.id_venta = dv.id_venta
+    WHERE v.id_caja = :idCaja
+    GROUP BY mp.id_medio_pago
+    """, nativeQuery = true)
+List<Object[]> obtenerTotalesPorMedioPagoDeCaja(
+        @Param("idCaja") Long idCaja
+);
 }

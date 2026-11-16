@@ -25,6 +25,20 @@ public class DevolucionService {
 
     private static final BigDecimal CERO = new BigDecimal("0.00");
 
+    private static final Set<String> MEDIOS_REEMBOLSO_HABILITADOS = Set.of(
+        "MP001",
+        "MP002",
+        "MP003",
+        "MP004",
+        "MP005",
+        "MP006",
+        "MP008",
+        "MP009",
+        "MP010",
+        "MP011",
+        "MP012",
+        "MP015"
+   );
     private final DevolucionRepository devolucionRepository;
     private final DetalleDevolucionRepository detalleDevolucionRepository;
     private final DetalleVentaRepository detalleVentaRepository;
@@ -32,6 +46,7 @@ public class DevolucionService {
     private final ProductoRepository productoRepository;
     private final UsuarioRepository usuarioRepository;
     private final CajaRepository cajaRepository;
+    private final MedioPagoRepository medioPagoRepository;
 
 
     // =========================================================
@@ -46,6 +61,26 @@ public class DevolucionService {
 
         Usuario usuario = obtenerUsuario(nombreUsuario);
         validarPermiso(usuario);
+
+        // Validar el medio de pago utilizado para el reembolso.
+        if (
+        request.getIdMedioPagoReembolso() == null
+        || !MEDIOS_REEMBOLSO_HABILITADOS.contains(
+                request.getIdMedioPagoReembolso()
+        )
+) {
+    throw new BusinessException(
+            "El medio de pago seleccionado no está habilitado "
+            + "para realizar reembolsos."
+    );
+}
+        MedioPago medioPagoReembolso = medioPagoRepository
+                .findById(request.getIdMedioPagoReembolso())
+                .orElseThrow(() ->
+                    new NotFoundException(
+                        "Medio de pago del reembolso no encontrado."
+                    )
+                );
 
         if (request.getItems() == null || request.getItems().isEmpty()) {
             throw new BusinessException(
@@ -80,6 +115,37 @@ public class DevolucionService {
         ).orElseThrow(() ->
                 new NotFoundException("Venta original no encontrada.")
         );
+
+        // 1. Buscar la caja abierta del usuario que procesa el reembolso.
+Caja cajaEncontrada = cajaRepository
+        .findFirstByUsuario_IdUsuarioAndEstadoOrderByFechaAperturaDesc(
+                usuario.getIdUsuario(),
+                "ABIERTA"
+        )
+        .orElseThrow(() ->
+                new BusinessException(
+                        "Debes abrir una caja antes de registrar un reembolso."
+                )
+        );
+
+        // 2. Obtener el bloqueo de la caja.
+Caja caja = cajaRepository
+        .findByIdCajaAndUsuario_Usuario(
+                cajaEncontrada.getIdCaja(),
+                nombreUsuario
+        )
+        .orElseThrow(() ->
+                new BusinessException(
+                        "No se encontró la caja del usuario."
+                )
+        );
+
+        // 3. Validar el estado después del bloqueo.
+if (!"ABIERTA".equals(caja.getEstado())) {
+    throw new BusinessException(
+            "No se pueden registrar reembolsos en una caja cerrada."
+    );
+}
 
         // Ordenar los detalles para reducir el riesgo de deadlocks.
         List<DetalleDevolucionRequest> itemsOrdenados =
@@ -207,13 +273,35 @@ public class DevolucionService {
 
         montoTotal = montoTotal.setScale(2, RoundingMode.HALF_UP);
 
-        // Asociar la devolución a la caja abierta, si existe.
-        Caja caja = cajaRepository
-                .findFirstByUsuario_IdUsuarioAndEstadoOrderByFechaAperturaDesc(
-                        usuario.getIdUsuario(),
-                        "ABIERTA"
-                )
-                .orElse(null);
+        // =====================================================
+// VALIDAR IMPORTE ACUMULADO DE DEVOLUCIONES
+// =====================================================
+
+// Obtener el importe original de la venta.
+BigDecimal totalVenta = detalleVentaRepository
+        .findByVentaIdVenta(venta.getIdVenta())
+        .stream()
+        .map(DetalleVenta::getSubtotal)
+        .reduce(BigDecimal.ZERO, BigDecimal::add)
+        .setScale(2, RoundingMode.HALF_UP);
+
+// Obtener devoluciones anteriores.
+BigDecimal totalYaReembolsado =
+        devolucionRepository.totalReembolsadoPorVenta(
+                venta.getIdVenta()
+        );
+
+// Comprobar el importe acumulado.
+BigDecimal totalNuevoReembolsado =
+        totalYaReembolsado.add(montoTotal);
+
+if (totalNuevoReembolsado.compareTo(totalVenta) > 0) {
+
+    throw new BusinessException(
+            "El importe acumulado de las devoluciones "
+            + "supera el importe original de la venta."
+    );
+}
 
         // Número interno de nota de crédito.
         // No representa una autorización electrónica SUNAT.
@@ -228,6 +316,7 @@ public class DevolucionService {
                 .venta(venta)
                 .usuario(usuario)
                 .caja(caja)
+                .medioPagoReembolso(medioPagoReembolso)
                 .numeroNotaCredito(numeroNota)
                 .fechaRegistro(java.time.LocalDateTime.now())
                 .motivo(request.getMotivo().trim())
@@ -452,6 +541,9 @@ public class DevolucionService {
                         devolucion.getCaja() != null
                                 ? devolucion.getCaja().getIdCaja()
                                 : null
+                )
+                .medioPagoReembolso(
+                        devolucion.getMedioPagoReembolso().getDescripcion()
                 )
                 .fechaRegistro(devolucion.getFechaRegistro())
                 .motivo(devolucion.getMotivo())

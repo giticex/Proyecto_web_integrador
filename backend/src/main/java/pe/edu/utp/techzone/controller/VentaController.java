@@ -13,6 +13,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
+import java.security.Principal;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import pe.edu.utp.techzone.dto.RegistrarVentaRequest;
 import pe.edu.utp.techzone.dto.VentaDTO;
@@ -25,10 +28,34 @@ import java.util.List;
 @RequiredArgsConstructor
 public class VentaController {
     private final VentaService ventaService;
-
     @PostMapping
     public VentaDTO registrar(@Valid @RequestBody RegistrarVentaRequest request) {
         return ventaService.registrar(request);
+    }
+
+    @PostMapping("/pos")
+    public ResponseEntity<VentaDTO> registrarDesdePos(
+        @Valid @RequestBody RegistrarVentaRequest request,
+        Principal principal
+   ) {
+    if (principal == null
+            || principal.getName() == null
+            || principal.getName().isBlank()) {
+
+        throw new ResponseStatusException(
+                HttpStatus.UNAUTHORIZED,
+                "Se requiere una sesión autenticada."
+        );
+    }
+
+    VentaDTO venta = ventaService.registrarDesdePos(
+            request,
+            principal.getName()
+    );
+
+    return ResponseEntity
+            .status(HttpStatus.CREATED)
+            .body(venta);
     }
 
     @GetMapping("/{idVenta}")

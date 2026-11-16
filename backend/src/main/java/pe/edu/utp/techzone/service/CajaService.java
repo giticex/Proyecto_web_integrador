@@ -18,6 +18,7 @@ import pe.edu.utp.techzone.exception.BusinessException;
 import pe.edu.utp.techzone.exception.NotFoundException;
 
 import pe.edu.utp.techzone.repository.CajaRepository;
+import pe.edu.utp.techzone.repository.DevolucionRepository;
 import pe.edu.utp.techzone.repository.UsuarioRepository;
 import pe.edu.utp.techzone.repository.VentaRepository;
 
@@ -39,6 +40,7 @@ public class CajaService {
     private final CajaRepository cajaRepository;
     private final UsuarioRepository usuarioRepository;
     private final VentaRepository ventaRepository;
+    private final DevolucionRepository devolucionRepository;
 
 
     // =========================================================
@@ -166,67 +168,115 @@ public class CajaService {
     // =========================================================
     // 4. CALCULAR VENTAS ESPERADAS POR MEDIO DE PAGO
     // =========================================================
+private void calcularVentasEsperadas(Caja caja) {
 
-    private void calcularVentasEsperadas(Caja caja) {
+    // 0 = efectivo, 1 = tarjetas, 2 = transferencias.
+    BigDecimal[] totales = {
+            CERO,
+            CERO,
+            CERO
+    };
 
-        BigDecimal efectivo = CERO;
-        BigDecimal tarjeta = CERO;
-        BigDecimal transferencia = CERO;
-        BigDecimal otros = CERO;
+    // =====================================================
+    // SUMAR VENTAS
+    // =====================================================
 
-        List<Object[]> resultados =
-                ventaRepository.obtenerTotalesPorMedioPagoDeCaja(
-                        caja.getIdCaja()
-                );
+    List<Object[]> ventas =
+            ventaRepository.obtenerTotalesPorMedioPagoDeCaja(
+                    caja.getIdCaja()
+            );
 
-        for (Object[] fila : resultados) {
+    for (Object[] fila : ventas) {
 
-            String medioPago = String.valueOf(fila[0])
-                    .toLowerCase(Locale.ROOT);
+        String idMedioPago = String.valueOf(fila[0]);
 
-            BigDecimal total = convertirDecimal(fila[1]);
+        BigDecimal monto = convertirDecimal(fila[1]);
 
-            if (medioPago.contains("efectivo")) {
+        int categoria = indiceCategoriaMedioPago(idMedioPago);
 
-                efectivo = efectivo.add(total);
-
-            } else if (
-                    medioPago.contains("tarjeta")
-                    || medioPago.contains("visa")
-                    || medioPago.contains("mastercard")
-                    || medioPago.contains("american express")
-            ) {
-
-                tarjeta = tarjeta.add(total);
-
-            } else if (
-                    medioPago.contains("yape")
-                    || medioPago.contains("plin")
-                    || medioPago.contains("transferencia")
-                    || medioPago.contains("deposito")
-                    || medioPago.contains("depósito")
-                    || medioPago.contains("billetera")
-                    || medioPago.contains("paypal")
-            ) {
-
-                transferencia = transferencia.add(total);
-
-            } else {
-
-                otros = otros.add(total);
-            }
-        }
-
-        // El fondo inicial forma parte del efectivo esperado.
-        caja.setEfectivoEsperado(
-                caja.getFondoInicial().add(efectivo)
-        );
-
-        caja.setTarjetaEsperada(tarjeta);
-        caja.setTransferenciaEsperada(transferencia);
-        caja.setOtrosEsperados(otros);
+        totales[categoria] = totales[categoria].add(monto);
     }
 
+    // =====================================================
+    //DESCONTAR REEMBOLSOS
+    // =====================================================
+
+    List<Object[]> reembolsos =
+            devolucionRepository
+                    .obtenerTotalesReembolsadosPorMedioPagoDeCaja(
+                            caja.getIdCaja()
+                    );
+
+    for (Object[] fila : reembolsos) {
+
+        String idMedioPago = String.valueOf(fila[0]);
+
+        BigDecimal monto = convertirDecimal(fila[1]);
+
+        int categoria = indiceCategoriaMedioPago(idMedioPago);
+
+        totales[categoria] = totales[categoria].subtract(monto);
+    }
+
+    // =====================================================
+    // ESTABLECER IMPORTES ESPERADOS
+    // =====================================================
+
+    caja.setEfectivoEsperado(
+            caja.getFondoInicial().add(totales[0])
+    );
+
+    caja.setTarjetaEsperada(totales[1]);
+
+    caja.setTransferenciaEsperada(totales[2]);
+
+    // Los medios no habilitados no se contabilizan como otros.
+    caja.setOtrosEsperados(CERO);
+}
+
+
+// =========================================================
+// CLASIFICAR MEDIOS DE PAGO
+// =========================================================
+
+private int indiceCategoriaMedioPago(String idMedioPago) {
+
+    return switch (idMedioPago) {
+
+        // Efectivo.
+        case "MP001" -> 0;
+
+        // Tarjetas.
+        case "MP002",
+             "MP003",
+             "MP009",
+             "MP010",
+             "MP011" -> 1;
+
+        // Transferencias y billeteras digitales.
+        case "MP004",
+             "MP005",
+             "MP006",
+             "MP008",
+             "MP012",
+             "MP015" -> 2;
+
+        // Medios temporalmente deshabilitados.
+        case "MP007",
+             "MP013",
+             "MP014" -> throw new BusinessException(
+                    "Existe una operación con un medio de pago "
+                    + "temporalmente deshabilitado: "
+                    + idMedioPago
+                    + ". Debe regularizarse antes del cierre."
+            );
+
+        default -> throw new BusinessException(
+                "No existe una clasificación de caja para el medio de pago: "
+                + idMedioPago
+        );
+    };
+}
 
     // =========================================================
     // 5. HISTORIAL PAGINADO

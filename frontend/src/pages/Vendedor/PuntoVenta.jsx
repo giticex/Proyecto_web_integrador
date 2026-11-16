@@ -13,12 +13,22 @@ import { clienteService, productoService, ventaService } from '../../services/ap
 
 const soles = (valor) => `S/ ${Number(valor || 0).toFixed(2)}`;
 
+
 const METODOS_PAGO = [
   { id: 'MP001', nombre: 'Efectivo', icono: Banknote },
-  { id: 'MP003', nombre: 'Tarjeta', icono: CreditCard },
+  { id: 'MP002', nombre: 'Tarjeta de crédito', icono: CreditCard },
+  { id: 'MP003', nombre: 'Tarjeta de débito', icono: CreditCard },
   { id: 'MP004', nombre: 'Yape', icono: Smartphone },
-  { id: 'MP005', nombre: 'Plin', icono: Smartphone }
+  { id: 'MP005', nombre: 'Plin', icono: Smartphone },
+  { id: 'MP006', nombre: 'Transferencia', icono: Smartphone },
+  { id: 'MP008', nombre: 'Billetera digital', icono: Smartphone },
+  { id: 'MP009', nombre: 'Visa', icono: CreditCard },
+  { id: 'MP010', nombre: 'Mastercard', icono: CreditCard },
+  { id: 'MP011', nombre: 'American Express', icono: CreditCard },
+  { id: 'MP012', nombre: 'Depósito', icono: Banknote },
+  { id: 'MP015', nombre: 'PayPal', icono: Smartphone }
 ];
+
 
 export default function PuntoVenta({ setVista, setVentaGenerada }) {
   const [productos, setProductos] = useState([]);
@@ -241,7 +251,7 @@ export default function PuntoVenta({ setVista, setVentaGenerada }) {
 
     setCargando(true);
     try {
-      const venta = await ventaService.registrar(request);
+      const venta = await ventaService.registrarPOS(request);
       setCarrito([]);
       setVentaGenerada(venta);
       setVista('comprobante');

@@ -32,6 +32,10 @@ public class Devolucion {
     @JoinColumn(name = "id_caja")
     private Caja caja;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_medio_pago_reembolso", nullable = false)
+    private MedioPago medioPagoReembolso;
+
     @Column(name = "numero_nota_credito", nullable = false, unique = true, length = 40)
     private String numeroNotaCredito;
 
