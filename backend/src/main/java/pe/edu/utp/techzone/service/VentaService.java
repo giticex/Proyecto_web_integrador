@@ -232,6 +232,7 @@ if (!"ABIERTA".equals(caja.getEstado())) {
 
 // Ordenar productos por ID para reducir deadlocks
 // cuando varias ventas procesan productos simultáneamente.
+
 List<ItemVentaRequest> itemsOrdenados =
         request.getItems().stream()
                 .sorted(Comparator.comparing(
@@ -241,12 +242,11 @@ List<ItemVentaRequest> itemsOrdenados =
 
 for (ItemVentaRequest item : itemsOrdenados) {
 
-    // Obtener producto con bloqueo pesimista.
-    Producto producto = productoService.obtenerEntidadConBloqueo(
-            item.getIdProducto()
-    );
+    Producto producto =
+            productoService.obtenerEntidadConBloqueo(
+                    item.getIdProducto()
+            );
 
-    // Validar y descontar stock.
     productoService.descontarStock(
             producto,
             item.getCantidad()
@@ -268,11 +268,8 @@ for (ItemVentaRequest item : itemsOrdenados) {
 
     detalleVentaRepository.save(detalle);
 }
-
-
         return buscar(idVenta);
     }
-
 
     // =========================================================
     // 4. GENERAR NÚMERO DE COMPROBANTE
