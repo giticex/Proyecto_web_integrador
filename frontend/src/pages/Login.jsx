@@ -101,7 +101,7 @@ export default function Login() {
       <section className="loginHero">
         <div className="brandBadge">Sistema de ventas conectado a BD</div>
         <h1>TechZone</h1>
-        <p>Login único para cliente y administrador. La interfaz cambia automáticamente según el rol detectado.</p>
+        <p>Bienvenidos a la empresa,esperamos que disfruten de la experiencia de compra y venta de productos tecnológicos.</p>
         <div className="loginStats">
           <span>UX/UI moderna</span>
           <span>Spring Boot</span>
