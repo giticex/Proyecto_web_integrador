@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { BrowserRouter, Navigate, Outlet, Route, Routes, useLocation } from 'react-router-dom';
 import { Menu as MenuIcon, X } from 'lucide-react';
 import Navbar from './components/Navbar';
 import Login from './pages/Login';
@@ -18,57 +19,40 @@ import ConsultarComprobantes from './pages/Vendedor/ConsultarComprobantes';
 import Usuarios from './pages/Admin/Usuarios';
 import AuditoriaCajas from './pages/Admin/AuditoriaCajas';
 import AuditoriaDevoluciones from './pages/Admin/AuditoriaDevoluciones';
+import ProtectedRoute from './routes/ProtectedRoute';
+import { RUTAS, rutaInicio } from './routes/rutas';
 import { useApp } from './context/AppContext';
-import { obtenerCaja } from './utils/caja';
 
-export default function App() {
-  const { sesion, esAdmin, esVendedor } = useApp();
-  const [vista, setVista] = useState('login');
-  const [ventaGenerada, setVentaGenerada] = useState(null);
+function Inicio() {
+  const { sesion } = useApp();
+  return <Navigate to={rutaInicio(sesion)} replace />;
+}
+
+function LoginRoute() {
+  const { sesion } = useApp();
+  if (sesion) {
+    return <Navigate to={rutaInicio(sesion)} replace />;
+  }
+  return <Login />;
+}
+
+function ComprobanteRuta() {
+  const location = useLocation();
+  return <Comprobante venta={location.state?.venta || null} />;
+}
+
+function DevolucionesPorRol() {
+  const { esAdmin } = useApp();
+  return esAdmin ? <AuditoriaDevoluciones /> : <Devoluciones />;
+}
+
+function AppLayout() {
   const [menuAbierto, setMenuAbierto] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
-    if (!sesion) {
-      setVista('login');
-      return;
-    }
-    setVista(esAdmin ? 'dashboard' : esVendedor ? (obtenerCaja() ? 'puntoventa' : 'apertura') : 'productos');
-  }, [sesion, esAdmin, esVendedor]);
-
-  function cambiarVista(nuevaVista) {
-    if (!sesion) {
-      setVista('login');
-      return;
-    }
-    setVista(nuevaVista);
     setMenuAbierto(false);
-  }
-
-  function renderVista() {
-    if (!sesion || vista === 'login') return <Login />;
-    if (vista === 'productos') return <Productos />;
-    if (vista === 'carrito') return <Carrito setVista={cambiarVista} setVentaGenerada={setVentaGenerada} />;
-    if (vista === 'historial') return <Historial setVista={cambiarVista} setVentaGenerada={setVentaGenerada} />;
-    if (vista === 'dashboard') return <Dashboard setVista={cambiarVista} setVentaGenerada={setVentaGenerada} />;
-    if (vista === 'reportes') return <Reportes setVista={cambiarVista} setVentaGenerada={setVentaGenerada} />;
-    if (vista === 'inventario') return <Inventario />;
-    if (vista === 'clientes') return <Clientes setVista={cambiarVista} />;
-    if (vista === 'puntoventa') return <PuntoVenta setVista={cambiarVista} setVentaGenerada={setVentaGenerada} />;
-    if (vista === 'apertura') return <AperturaCaja setVista={cambiarVista} />;
-    if (vista === 'cierre') return <CierreCaja setVista={cambiarVista} />;
-    if (vista === 'devoluciones') return esAdmin ? <AuditoriaDevoluciones /> : <Devoluciones setVista={cambiarVista} />;
-    if (vista === 'comprobantes') return <ConsultarComprobantes setVista={cambiarVista} setVentaGenerada={setVentaGenerada} />;
-    if (vista === 'usuarios') return <Usuarios />;
-    if (vista === 'auditoriacajas') return <AuditoriaCajas />;
-    if (vista === 'comprobante') return <Comprobante venta={ventaGenerada} setVista={cambiarVista} />;
-    if (esAdmin) return <Dashboard setVista={cambiarVista} setVentaGenerada={setVentaGenerada} />;
-    if (esVendedor) return <PuntoVenta setVista={cambiarVista} setVentaGenerada={setVentaGenerada} />;
-    return <Productos />;
-  }
-
-  if (!sesion) {
-    return <Login />;
-  }
+  }, [location.pathname]);
 
   return (
     <div className={`appLayout ${menuAbierto ? 'menuAbierto' : ''}`}>
@@ -77,7 +61,7 @@ export default function App() {
           type="button"
           className="mobileMenuBoton"
           onClick={() => setMenuAbierto((abierto) => !abierto)}
-          aria-label={menuAbierto ? 'Cerrar menú' : 'Abrir menú'}
+          aria-label={menuAbierto ? 'Cerrar menu' : 'Abrir menu'}
         >
           {menuAbierto ? <X size={22} /> : <MenuIcon size={22} />}
         </button>
@@ -85,7 +69,9 @@ export default function App() {
           Tech<span>Zone</span>
         </span>
       </header>
-      <Navbar vista={vista} setVista={cambiarVista} />
+
+      <Navbar />
+
       {menuAbierto && (
         <div
           className="sidebarOverlay no-print"
@@ -93,9 +79,61 @@ export default function App() {
           aria-hidden="true"
         />
       )}
+
       <main className="contenido">
-        {renderVista()}
+        <Outlet />
       </main>
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path={RUTAS.login} element={<LoginRoute />} />
+
+        <Route element={<ProtectedRoute />}>
+          <Route element={<AppLayout />}>
+            <Route index element={<Inicio />} />
+
+            <Route element={<ProtectedRoute roles={['CLIENTE']} />}>
+              <Route path={RUTAS.productos} element={<Productos />} />
+              <Route path={RUTAS.carrito} element={<Carrito />} />
+            </Route>
+
+            <Route element={<ProtectedRoute roles={['ADMIN', 'VENDEDOR']} />}>
+              <Route path={RUTAS.puntoventa} element={<PuntoVenta />} />
+              <Route path={RUTAS.devoluciones} element={<DevolucionesPorRol />} />
+              <Route path={RUTAS.comprobantes} element={<ConsultarComprobantes />} />
+            </Route>
+
+            <Route element={<ProtectedRoute roles={['VENDEDOR']} />}>
+              <Route path={RUTAS.apertura} element={<AperturaCaja />} />
+              <Route path={RUTAS.cierre} element={<CierreCaja />} />
+            </Route>
+
+            <Route element={<ProtectedRoute roles={['ADMIN']} />}>
+              <Route path={RUTAS.dashboard} element={<Dashboard />} />
+              <Route path={RUTAS.inventario} element={<Inventario />} />
+              <Route path={RUTAS.clientes} element={<Clientes />} />
+              <Route path={RUTAS.reportes} element={<Reportes />} />
+              <Route path={RUTAS.usuarios} element={<Usuarios />} />
+              <Route path={RUTAS.auditoriacajas} element={<AuditoriaCajas />} />
+            </Route>
+
+            <Route element={<ProtectedRoute roles={['ADMIN', 'CLIENTE']} />}>
+              <Route path={RUTAS.historial} element={<Historial />} />
+            </Route>
+
+            <Route element={<ProtectedRoute roles={['ADMIN', 'VENDEDOR', 'CLIENTE']} />}>
+              <Route path={RUTAS.comprobante} element={<ComprobanteRuta />} />
+            </Route>
+
+            <Route path="*" element={<Inicio />} />
+          </Route>
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }

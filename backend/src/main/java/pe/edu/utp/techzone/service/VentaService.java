@@ -1,6 +1,8 @@
 package pe.edu.utp.techzone.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import pe.edu.utp.techzone.dto.DetalleVentaDTO;
@@ -15,12 +17,14 @@ import pe.edu.utp.techzone.entity.Producto;
 import pe.edu.utp.techzone.entity.TipoDocumento;
 import pe.edu.utp.techzone.entity.Usuario;
 import pe.edu.utp.techzone.entity.Venta;
+import pe.edu.utp.techzone.exception.BusinessException;
 import pe.edu.utp.techzone.exception.NotFoundException;
 import pe.edu.utp.techzone.repository.DetalleVentaRepository;
 import pe.edu.utp.techzone.repository.MedioPagoRepository;
 import pe.edu.utp.techzone.repository.TipoDocumentoRepository;
 import pe.edu.utp.techzone.repository.UsuarioRepository;
 import pe.edu.utp.techzone.repository.VentaRepository;
+import pe.edu.utp.techzone.security.UsuarioAutenticado;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -30,7 +34,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class VentaService {
-    private static final String USUARIO_VENDEDOR = "admin";
     private final VentaRepository ventaRepository;
     private final DetalleVentaRepository detalleVentaRepository;
     private final TipoDocumentoRepository tipoDocumentoRepository;
@@ -42,16 +45,15 @@ public class VentaService {
 
     @Transactional
     public VentaDTO registrar(RegistrarVentaRequest request) {
-        // API React: mantiene el vendedor actual por defecto.
-        return registrar(request, USUARIO_VENDEDOR);
+        // El vendedor se obtiene del JWT del usuario autenticado, nunca de una
+        // constante hardcodeada.
+        return registrar(request, usuarioAutenticado());
     }
 
     @Transactional
     public VentaDTO registrar(RegistrarVentaRequest request, String usuarioVendedor) {
         Cliente cliente = clienteService.obtenerEntidad(request.getIdCliente());
-        Persona vendedor = usuarioRepository.findByUsuario(usuarioVendedor)
-                .map(Usuario::getPersona)
-                .orElseThrow(() -> new NotFoundException("Usuario vendedor no encontrado"));
+        Persona vendedor = resolverPersonaVendedor(usuarioVendedor);
         TipoDocumento tipoDocumento = tipoDocumentoRepository.findById(request.getTipoDocumento())
                 .orElseThrow(() -> new NotFoundException("Tipo de documento no encontrado"));
         MedioPago medioPago = medioPagoRepository.findById(request.getMedioPago())
@@ -91,6 +93,31 @@ public class VentaService {
         }
 
         return buscar(idVenta);
+    }
+
+    /**
+     * Usuario real autenticado en el SecurityContext (cargado desde el JWT).
+     */
+    private String usuarioAutenticado() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new BusinessException("No hay un usuario autenticado para registrar la venta");
+        }
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof UsuarioAutenticado usuario) {
+            return usuario.usuario();
+        }
+        throw new BusinessException("No se pudo determinar el usuario autenticado");
+    }
+
+    /**
+     * Empleados (ADMIN/VENDEDOR) se resuelven desde usuario; los clientes que
+     * compran desde la tienda se resuelven desde su persona asociada.
+     */
+    private Persona resolverPersonaVendedor(String usuarioVendedor) {
+        return usuarioRepository.findByUsuario(usuarioVendedor)
+                .map(Usuario::getPersona)
+                .orElseGet(() -> clienteService.obtenerPersonaDelCliente(usuarioVendedor));
     }
 
     /** Genera el número de comprobante oficial con formato SERIE-CORRELATIVO (correlativo de 8 dígitos). */

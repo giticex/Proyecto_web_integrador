@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Banknote,
   Barcode,
@@ -20,7 +21,8 @@ const METODOS_PAGO = [
   { id: 'MP005', nombre: 'Plin', icono: Smartphone }
 ];
 
-export default function PuntoVenta({ setVista, setVentaGenerada }) {
+export default function PuntoVenta() {
+  const navigate = useNavigate();
   const [productos, setProductos] = useState([]);
   const [clientes, setClientes] = useState([]);
   const [codigoBusqueda, setCodigoBusqueda] = useState('');
@@ -243,8 +245,7 @@ export default function PuntoVenta({ setVista, setVentaGenerada }) {
     try {
       const venta = await ventaService.registrar(request);
       setCarrito([]);
-      setVentaGenerada(venta);
-      setVista('comprobante');
+      navigate('/comprobante', { state: { venta } });
     } catch (error) {
       setMensaje(error.message);
     } finally {

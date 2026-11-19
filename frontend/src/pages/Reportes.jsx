@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { BarChart3, CalendarDays, Eye, FileCheck, Package, Printer, Users } from 'lucide-react';
 import { dashboardService, ventaService } from '../services/api';
 import { formatoFecha, formatoMoneda } from '../utils/format';
 import Alerta from '../components/Alerta';
 
-export default function Reportes({ setVista, setVentaGenerada }) {
+export default function Reportes() {
+  const navigate = useNavigate();
   const [datos, setDatos] = useState(null);
   const [ventas, setVentas] = useState([]);
   const [mensaje, setMensaje] = useState('');
@@ -56,12 +58,7 @@ export default function Reportes({ setVista, setVentaGenerada }) {
       condicionPago: 'CONTADO',
       observaciones: 'Venta registrada en plataforma'
     };
-    if (setVentaGenerada) {
-      setVentaGenerada(ventaCompleta);
-    }
-    if (setVista) {
-      setVista('comprobante');
-    }
+    navigate('/comprobante', { state: { venta: ventaCompleta } });
   }
 
   const tarjetas = [
@@ -80,11 +77,9 @@ export default function Reportes({ setVista, setVentaGenerada }) {
           <p>Supervisión tributaria de ventas, cálculo de IGV para SUNAT y control analítico.</p>
         </div>
         <div className="flex gap-2">
-          {setVista && (
-            <button className="btnPrincipal" onClick={() => setVista('comprobante')}>
-              <FileCheck size={17} /> Ver Boletas y Facturas
-            </button>
-          )}
+          <button className="btnPrincipal" onClick={() => navigate('/comprobante')}>
+            <FileCheck size={17} /> Ver Boletas y Facturas
+          </button>
           <button className="btnSecundario" onClick={() => window.print()}>
             <Printer size={17} /> Imprimir Reporte
           </button>
@@ -170,11 +165,9 @@ export default function Reportes({ setVista, setVentaGenerada }) {
                   <h3>Últimos Comprobantes Emitidos</h3>
                   <p>Transacciones con comprobante electrónico listo para visualización e impresión.</p>
                 </div>
-                {setVista && (
-                  <button className="btnSecundario" onClick={() => setVista('historial')}>
-                    Ver historial completo
-                  </button>
-                )}
+                <button className="btnSecundario" onClick={() => navigate('/historial')}>
+                  Ver historial completo
+                </button>
               </div>
               <table>
                 <thead>

@@ -3,7 +3,7 @@ import { Mail, Phone, Search, UserCheck, Users, X } from 'lucide-react';
 import { clienteService } from '../services/api';
 import Alerta from '../components/Alerta';
 
-export default function Clientes({ setVista }) {
+export default function Clientes() {
   const [clientes, setClientes] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [busqueda, setBusqueda] = useState('');

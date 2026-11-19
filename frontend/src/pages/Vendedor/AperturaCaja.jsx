@@ -1,12 +1,14 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { CalendarClock, Unlock, UserRound } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { abrirCaja, obtenerCaja } from '../../utils/caja';
 
 const soles = (valor) => `S/ ${Number(valor || 0).toFixed(2)}`;
 
-export default function AperturaCaja({ setVista }) {
+export default function AperturaCaja() {
   const { sesion } = useApp();
+  const navigate = useNavigate();
   const cajaActual = obtenerCaja();
   const fechaApertura = new Date();
 
@@ -36,7 +38,7 @@ export default function AperturaCaja({ setVista }) {
       observaciones: observaciones.trim(),
       fechaApertura: fechaApertura.toISOString()
     });
-    setVista('puntoventa');
+    navigate('/pos');
   }
 
   return (
@@ -56,7 +58,7 @@ export default function AperturaCaja({ setVista }) {
             Ya existe una caja abierta por <strong>{cajaActual.cajero}</strong> con fondo de{' '}
             <strong>{soles(cajaActual.fondoInicial)}</strong>.
           </span>
-          <button type="button" className="tzBtn tzBtnPrimary" onClick={() => setVista('puntoventa')}>
+          <button type="button" className="tzBtn tzBtnPrimary" onClick={() => navigate('/pos')}>
             Ir al Punto de Venta
           </button>
         </div>

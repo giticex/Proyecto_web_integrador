@@ -1,0 +1,361 @@
+{
+  "info": {
+    "_postman_id": "b3c8f6a0-4f4e-4a6d-9d2a-techzone2026",
+    "name": "TechZone API",
+    "description": "Coleccion completa de la API REST de TechZone. Importar junto con TechZone-Local.postman_environment.json. Ejecutar primero Auth > Login para guardar token y refreshToken.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login ADMIN",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.test('Devuelve access token', () => pm.expect(data.token).to.be.a('string'));",
+                  "pm.collectionVariables.set('token', data.token);",
+                  "pm.collectionVariables.set('refreshToken', data.refreshToken);",
+                  "pm.collectionVariables.set('rol', data.rol);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": \"admin\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login VENDEDOR",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.collectionVariables.set('token', data.token);",
+                  "pm.collectionVariables.set('refreshToken', data.refreshToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": \"vendedor\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Login CLIENTE",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.collectionVariables.set('token', data.token);",
+                  "pm.collectionVariables.set('refreshToken', data.refreshToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": \"CLI001\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] }
+          }
+        },
+        {
+          "name": "Me (usuario autenticado)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/me", "host": ["{{baseUrl}}"], "path": ["auth", "me"] }
+          }
+        },
+        {
+          "name": "Refresh token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "pm.collectionVariables.set('token', data.token);",
+                  "pm.collectionVariables.set('refreshToken', data.refreshToken);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/refresh", "host": ["{{baseUrl}}"], "path": ["auth", "refresh"] }
+          }
+        },
+        {
+          "name": "Logout (revoca token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Productos",
+      "item": [
+        {
+          "name": "Listar productos",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/productos", "host": ["{{baseUrl}}"], "path": ["productos"] }
+          }
+        },
+        {
+          "name": "Obtener producto",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/productos/1", "host": ["{{baseUrl}}"], "path": ["productos", "1"] }
+          }
+        },
+        {
+          "name": "Crear producto (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Monitor 24 pulgadas\",\n  \"stock\": 10,\n  \"precio\": 699.90,\n  \"categoria\": \"Monitores\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/productos", "host": ["{{baseUrl}}"], "path": ["productos"] }
+          }
+        },
+        {
+          "name": "Actualizar producto (ADMIN)",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nombre\": \"Monitor 24 pulgadas\",\n  \"stock\": 8,\n  \"precio\": 679.90,\n  \"categoria\": \"Monitores\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/productos/1", "host": ["{{baseUrl}}"], "path": ["productos", "1"] }
+          }
+        },
+        {
+          "name": "Eliminar producto (ADMIN)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/productos/1", "host": ["{{baseUrl}}"], "path": ["productos", "1"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ventas",
+      "item": [
+        {
+          "name": "Registrar venta",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test('Status 200', () => pm.response.to.have.status(200));",
+                  "const data = pm.response.json();",
+                  "if (data.idVenta) pm.collectionVariables.set('idVenta', data.idVenta);"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": \"CLI001\",\n  \"tipoDocumento\": \"TD001\",\n  \"medioPago\": \"MP001\",\n  \"numeroDocumento\": \"71262017\",\n  \"items\": [\n    { \"idProducto\": 2, \"cantidad\": 2 }\n  ]\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/ventas", "host": ["{{baseUrl}}"], "path": ["ventas"] }
+          }
+        },
+        {
+          "name": "Listar ventas (ADMIN/VENDEDOR)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/ventas", "host": ["{{baseUrl}}"], "path": ["ventas"] }
+          }
+        },
+        {
+          "name": "Buscar venta",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/ventas/{{idVenta}}", "host": ["{{baseUrl}}"], "path": ["ventas", "{{idVenta}}"] }
+          }
+        },
+        {
+          "name": "Historial por cliente",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/ventas/cliente/CLI001",
+              "host": ["{{baseUrl}}"],
+              "path": ["ventas", "cliente", "CLI001"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Clientes",
+      "item": [
+        {
+          "name": "Listar clientes (ADMIN/VENDEDOR)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/clientes", "host": ["{{baseUrl}}"], "path": ["clientes"] }
+          }
+        },
+        {
+          "name": "Registrar cliente (publico)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idCliente\": \"CLI900\",\n  \"nombre\": \"Cliente\",\n  \"apellido\": \"Prueba\",\n  \"telefono\": \"987654300\",\n  \"correo\": \"cliente.prueba@techzone.pe\",\n  \"password\": \"123456\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/clientes/registro", "host": ["{{baseUrl}}"], "path": ["clientes", "registro"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Catalogos",
+      "item": [
+        {
+          "name": "Tipos de documento",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/catalogos/tipos-documento",
+              "host": ["{{baseUrl}}"],
+              "path": ["catalogos", "tipos-documento"]
+            }
+          }
+        },
+        {
+          "name": "Medios de pago",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/catalogos/medios-pago",
+              "host": ["{{baseUrl}}"],
+              "path": ["catalogos", "medios-pago"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dashboard y Vendedores",
+      "item": [
+        {
+          "name": "Resumen dashboard (ADMIN)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/dashboard", "host": ["{{baseUrl}}"], "path": ["dashboard"] }
+          }
+        },
+        {
+          "name": "Listar vendedores (ADMIN)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/vendedores", "host": ["{{baseUrl}}"], "path": ["vendedores"] }
+          }
+        },
+        {
+          "name": "Crear vendedor (ADMIN)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"idPersona\": \"PERVEN2\",\n  \"nombre\": \"Nuevo\",\n  \"apellido\": \"Vendedor\",\n  \"fechaNacimiento\": \"1999-05-10\",\n  \"correo\": \"nuevo.vendedor@techzone.pe\",\n  \"telefono\": \"987111222\",\n  \"usuario\": \"vendedor2\",\n  \"contrasena\": \"123456\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/vendedores", "host": ["{{baseUrl}}"], "path": ["vendedores"] }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080/api" },
+    { "key": "token", "value": "" },
+    { "key": "refreshToken", "value": "" },
+    { "key": "idVenta", "value": "" },
+    { "key": "rol", "value": "" }
+  ]
+}

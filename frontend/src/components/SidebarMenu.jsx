@@ -1,4 +1,7 @@
-export default function SidebarMenu({ categorias, vista, setVista }) {
+import { NavLink } from 'react-router-dom';
+import { RUTAS } from '../routes/rutas';
+
+export default function SidebarMenu({ categorias }) {
   return (
     <nav className="menu">
       {categorias.map((grupo) => (
@@ -6,20 +9,20 @@ export default function SidebarMenu({ categorias, vista, setVista }) {
           <span className="menuGrupoTitulo">{grupo.titulo}</span>
           {grupo.items.map((opcion) => {
             const Icono = opcion.icono;
-            const activo = vista === opcion.id;
+            const destino = RUTAS[opcion.id] || '/';
             return (
-              <button
+              <NavLink
                 key={opcion.id}
-                type="button"
-                className={`menuBoton ${activo ? 'activo' : ''}`}
-                onClick={() => setVista(opcion.id)}
+                to={destino}
+                end
+                className={({ isActive }) => `menuBoton ${isActive ? 'activo' : ''}`}
               >
                 <Icono size={19} />
                 <span className="menuTexto">{opcion.texto}</span>
                 {opcion.badge !== null && opcion.badge !== undefined && (
                   <span className="badgeContador">{opcion.badge}</span>
                 )}
-              </button>
+              </NavLink>
             );
           })}
         </div>

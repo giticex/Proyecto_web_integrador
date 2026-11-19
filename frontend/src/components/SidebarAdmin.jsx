@@ -31,6 +31,6 @@ export const CATEGORIAS_ADMIN = [
   }
 ];
 
-export default function SidebarAdmin({ vista, setVista }) {
-  return <SidebarMenu categorias={CATEGORIAS_ADMIN} vista={vista} setVista={setVista} />;
+export default function SidebarAdmin() {
+  return <SidebarMenu categorias={CATEGORIAS_ADMIN} />;
 }

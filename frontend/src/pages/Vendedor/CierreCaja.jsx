@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Banknote, CreditCard, Lock, Printer, Smartphone, TrendingUp } from 'lucide-react';
 import { useApp } from '../../context/AppContext';
 import { ventaService } from '../../services/api';
@@ -14,8 +15,9 @@ function clasificarMedio(descripcion) {
   return 'otros';
 }
 
-export default function CierreCaja({ setVista }) {
+export default function CierreCaja() {
   const { sesion } = useApp();
+  const navigate = useNavigate();
   const caja = obtenerCaja();
 
   const [ventas, setVentas] = useState([]);
@@ -100,7 +102,7 @@ export default function CierreCaja({ setVista }) {
         </div>
         <div className="tzCard tzAviso">
           <span>Primero debes realizar la apertura de caja para poder cerrarla.</span>
-          <button type="button" className="tzBtn tzBtnPrimary" onClick={() => setVista('apertura')}>
+          <button type="button" className="tzBtn tzBtnPrimary" onClick={() => navigate('/apertura')}>
             Ir a Apertura de Caja
           </button>
         </div>
@@ -141,7 +143,7 @@ export default function CierreCaja({ setVista }) {
             <button type="button" className="tzBtn tzBtnPrimary" onClick={() => window.print()}>
               <Printer size={18} /> Imprimir Reporte
             </button>
-            <button type="button" className="tzBtn tzBtnGhost" onClick={() => setVista('apertura')}>
+            <button type="button" className="tzBtn tzBtnGhost" onClick={() => navigate('/apertura')}>
               Nueva Apertura
             </button>
           </div>

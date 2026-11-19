@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, SlidersHorizontal } from 'lucide-react';
 import { useApp } from '../context/AppContext';
 import { ventaService } from '../services/api';
 import { formatoFecha, formatoMoneda } from '../utils/format';
 import Alerta from '../components/Alerta';
 
-export default function Historial({ setVista, setVentaGenerada }) {
+export default function Historial() {
   const { cliente, esAdmin } = useApp();
+  const navigate = useNavigate();
   const [ventas, setVentas] = useState([]);
   const [mensaje, setMensaje] = useState('');
   const [cargando, setCargando] = useState(true);
@@ -68,8 +70,7 @@ export default function Historial({ setVista, setVentaGenerada }) {
   }, [filtradas]);
 
   function verDetalle(venta) {
-    setVentaGenerada(venta);
-    setVista('comprobante');
+    navigate('/comprobante', { state: { venta } });
   }
 
   return (

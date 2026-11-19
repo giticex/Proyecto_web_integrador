@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Printer, ReceiptText, RefreshCw, Search } from 'lucide-react';
 import { ventaService } from '../../services/api';
 import { formatoHora } from '../../utils/format';
@@ -8,7 +9,8 @@ const soles = (valor) => `S/ ${Number(valor || 0).toFixed(2)}`;
 const etiquetaComprobante = (venta) =>
   venta?.numeroDocumento || venta?.numeroComprobante || venta?.idVenta?.substring(0, 8) || '—';
 
-export default function ConsultarComprobantes({ setVista, setVentaGenerada }) {
+export default function ConsultarComprobantes() {
+  const navigate = useNavigate();
   const [ventas, setVentas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [filtro, setFiltro] = useState('');
@@ -42,8 +44,7 @@ export default function ConsultarComprobantes({ setVista, setVentaGenerada }) {
     : delDia;
 
   function reimprimir(venta) {
-    setVentaGenerada(venta);
-    setVista('comprobante');
+    navigate('/comprobante', { state: { venta } });
   }
 
   return (

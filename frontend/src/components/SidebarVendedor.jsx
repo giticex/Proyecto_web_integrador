@@ -19,6 +19,6 @@ export const CATEGORIAS_VENDEDOR = [
   }
 ];
 
-export default function SidebarVendedor({ vista, setVista }) {
-  return <SidebarMenu categorias={CATEGORIAS_VENDEDOR} vista={vista} setVista={setVista} />;
+export default function SidebarVendedor() {
+  return <SidebarMenu categorias={CATEGORIAS_VENDEDOR} />;
 }

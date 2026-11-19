@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, FileText, Printer, Receipt, ShoppingBag } from 'lucide-react';
 import ComprobanteA4 from '../components/ComprobanteA4';
 import ComprobanteTicket from '../components/ComprobanteTicket';
 import { ventaService } from '../services/api';
 import { useApp } from '../context/AppContext';
 
-export default function Comprobante({ venta: ventaInicial, setVista }) {
+export default function Comprobante({ venta: ventaInicial }) {
   const { esAdmin, cliente } = useApp();
+  const navigate = useNavigate();
   const [formato, setFormato] = useState('a4'); // 'a4' | 'ticket'
   const [listaVentas, setListaVentas] = useState([]);
   const [ventaActual, setVentaActual] = useState(ventaInicial);
@@ -97,7 +99,7 @@ export default function Comprobante({ venta: ventaInicial, setVista }) {
     <section className="comprobanteSeccion">
       <div className="comprobanteControlBar no-print">
         <div className="comprobanteTituloInfo">
-          <button className="btnIconoRegresar" onClick={() => setVista(esAdmin ? 'dashboard' : 'productos')} title="Regresar">
+          <button className="btnIconoRegresar" onClick={() => navigate(esAdmin ? '/dashboard' : '/productos')} title="Regresar">
             <ArrowLeft size={18} />
           </button>
           <div>
@@ -159,7 +161,7 @@ export default function Comprobante({ venta: ventaInicial, setVista }) {
             <button className="btnPrincipal" onClick={() => window.print()}>
               <Printer size={18} /> Imprimir / Guardar PDF
             </button>
-            <button className="btnSecundario" onClick={() => setVista(esAdmin ? 'historial' : 'productos')}>
+            <button className="btnSecundario" onClick={() => navigate(esAdmin ? '/historial' : '/productos')}>
               {esAdmin ? <Receipt size={16} /> : <ShoppingBag size={16} />}
               {esAdmin ? 'Historial ventas' : 'Catálogo'}
             </button>

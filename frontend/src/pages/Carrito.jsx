@@ -1,12 +1,14 @@
 import { CreditCard, Trash2, WalletCards, AlertCircle } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { formatoMoneda } from '../utils/format';
 import { ventaService } from '../services/api';
 import Alerta from '../components/Alerta';
 
-export default function Carrito({ setVista, setVentaGenerada }) {
+export default function Carrito() {
   const { cliente, carrito, total, cambiarCantidad, quitarProducto, limpiarCarrito } = useApp();
+  const navigate = useNavigate();
   const [tipoDocumento, setTipoDocumento] = useState('TD001');
   const [medioPago, setMedioPago] = useState('MP004');
   const [numeroDocumento, setNumeroDocumento] = useState('');
@@ -85,7 +87,7 @@ export default function Carrito({ setVista, setVentaGenerada }) {
 
     if (!cliente) {
       setMensaje('Debes iniciar sesión como cliente antes de pagar.');
-      setVista('login');
+      navigate('/login');
       return;
     }
 
@@ -124,10 +126,9 @@ export default function Carrito({ setVista, setVentaGenerada }) {
     setCargando(true);
     try {
       const venta = await ventaService.registrar(request);
-      setVentaGenerada(venta);
       limpiarCarrito();
       setExito('Compra registrada correctamente.');
-      setVista('comprobante');
+      navigate('/comprobante', { state: { venta } });
     } catch (error) {
       setMensaje(error.message);
     } finally {

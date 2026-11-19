@@ -1,11 +1,13 @@
 import { FileCheck, History, LogOut, Package, ShoppingCart, UserRound } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import SidebarAdmin from './SidebarAdmin';
 import SidebarVendedor from './SidebarVendedor';
 import SidebarMenu from './SidebarMenu';
 
-export default function Navbar({ vista, setVista }) {
+export default function Navbar() {
   const { sesion, esAdmin, esVendedor, carrito, cerrarSesion } = useApp();
+  const navigate = useNavigate();
 
   const cantidadTotalItems = carrito.reduce((acc, item) => acc + item.cantidad, 0);
 
@@ -26,6 +28,11 @@ export default function Navbar({ vista, setVista }) {
     }
   ];
 
+  async function salir() {
+    await cerrarSesion();
+    navigate('/login', { replace: true });
+  }
+
   return (
     <aside className="sidebar no-print">
       <div className="logoHeaderContainer">
@@ -43,11 +50,11 @@ export default function Navbar({ vista, setVista }) {
       </div>
 
       {esAdmin ? (
-        <SidebarAdmin vista={vista} setVista={setVista} />
+        <SidebarAdmin />
       ) : esVendedor ? (
-        <SidebarVendedor vista={vista} setVista={setVista} />
+        <SidebarVendedor />
       ) : (
-        <SidebarMenu categorias={categoriasCliente} vista={vista} setVista={setVista} />
+        <SidebarMenu categorias={categoriasCliente} />
       )}
 
       <div className="usuarioBox">
@@ -63,7 +70,7 @@ export default function Navbar({ vista, setVista }) {
           </div>
         </div>
 
-        <button className="btnSalir" onClick={cerrarSesion}>
+        <button className="btnSalir" onClick={salir}>
           <LogOut size={16} /> Cerrar sesión
         </button>
       </div>

@@ -2,6 +2,7 @@ package pe.edu.utp.techzone.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -21,6 +22,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<Map<String, Object>> business(BusinessException ex) {
         return response(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Map<String, Object>> accessDenied(AccessDeniedException ex) {
+        return response(HttpStatus.FORBIDDEN, "No tienes permisos para realizar esta accion");
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

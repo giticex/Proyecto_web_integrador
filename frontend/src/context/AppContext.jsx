@@ -1,4 +1,5 @@
-import { createContext, useContext, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { authService, EVENTO_SESION } from '../services/api';
 
 const AppContext = createContext(null);
 
@@ -16,6 +17,19 @@ export function AppProvider({ children }) {
   const esAdmin = sesion?.rol === 'ADMIN';
   const esVendedor = sesion?.rol === 'VENDEDOR';
 
+  // El interceptor HTTP renueva tokens y notifica por evento para mantener
+  // sincronizado el estado de React con localStorage.
+  useEffect(() => {
+    function sincronizar(evento) {
+      setSesion(evento.detail);
+      if (!evento.detail) {
+        setCarrito([]);
+      }
+    }
+    window.addEventListener(EVENTO_SESION, sincronizar);
+    return () => window.removeEventListener(EVENTO_SESION, sincronizar);
+  }, []);
+
   function guardarSesion(nuevaSesion) {
     setSesion(nuevaSesion);
     localStorage.setItem('sesion', JSON.stringify(nuevaSesion));
@@ -24,11 +38,17 @@ export function AppProvider({ children }) {
     }
   }
 
-  function cerrarSesion() {
-    setSesion(null);
-    setCarrito([]);
-    localStorage.removeItem('sesion');
-    localStorage.removeItem('carrito');
+  async function cerrarSesion() {
+    try {
+      await authService.logout();
+    } catch {
+      // Aunque el token ya haya expirado, siempre limpiamos el estado local.
+    } finally {
+      setSesion(null);
+      setCarrito([]);
+      localStorage.removeItem('sesion');
+      localStorage.removeItem('carrito');
+    }
   }
 
   function guardarCarrito(items) {

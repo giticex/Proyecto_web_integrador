@@ -1,10 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, Boxes, PackageCheck, ShoppingBag, TrendingUp, Trophy, Users, WalletCards } from 'lucide-react';
 import { dashboardService, ventaService } from '../services/api';
 import { formatoMoneda } from '../utils/format';
 import Alerta from '../components/Alerta';
 
-export default function Dashboard({ setVista }) {
+export default function Dashboard() {
+  const navigate = useNavigate();
   const [datos, setDatos] = useState(null);
   const [ventas, setVentas] = useState([]);
   const [mensaje, setMensaje] = useState('');
@@ -47,7 +49,7 @@ export default function Dashboard({ setVista }) {
           <h2>Estadísticas generales</h2>
           <p>Vista moderna para controlar ventas, clientes, stock y productos más vendidos.</p>
         </div>
-        <button className="btnPrincipal" onClick={() => setVista('reportes')}>Ver reportes</button>
+        <button className="btnPrincipal" onClick={() => navigate('/reportes')}>Ver reportes</button>
       </div>
 
       <Alerta tipo="error" mensaje={mensaje} />
@@ -106,7 +108,7 @@ export default function Dashboard({ setVista }) {
             <h3>Últimas compras registradas</h3>
             <p>Resumen rápido de las ventas más recientes.</p>
           </div>
-          <button onClick={() => setVista('historial')}>Ver historial completo</button>
+          <button onClick={() => navigate('/historial')}>Ver historial completo</button>
         </div>
         <table>
           <thead>

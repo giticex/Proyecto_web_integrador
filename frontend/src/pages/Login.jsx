@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { authService, clienteService } from '../services/api';
 import { useApp } from '../context/AppContext';
+import { rutaInicio } from '../routes/rutas';
 import Alerta from '../components/Alerta';
 import { LockKeyhole, User, UserPlus, AlertCircle } from 'lucide-react';
 
 export default function Login() {
   const { guardarSesion } = useApp();
+  const navigate = useNavigate();
   const [modoRegistro, setModoRegistro] = useState(false);
   const [cargando, setCargando] = useState(false);
   const [mensaje, setMensaje] = useState('');
@@ -89,6 +92,7 @@ export default function Login() {
 
       const sesion = await authService.login({ idCliente: form.usuario, password: form.password });
       guardarSesion(sesion);
+      navigate(rutaInicio(sesion), { replace: true });
     } catch (error) {
       setMensaje(error.message);
     } finally {
